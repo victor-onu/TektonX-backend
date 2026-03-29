@@ -16,6 +16,7 @@ import { Notification } from '../notifications/entities/notification.entity';
 import { Signup } from '../signups/entities/signup.entity';
 import { Message } from '../messages/entities/message.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MailService } from '../mail/mail.service';
 import { UserRole } from '../common/enums/user-role.enum';
 import { UserStatus } from '../common/enums/user-status.enum';
 import { NotificationType } from '../common/enums/notification-type.enum';
@@ -41,6 +42,7 @@ export class AdminService {
     @InjectRepository(Signup) private readonly signupRepo: Repository<Signup>,
     @InjectRepository(Message) private readonly messageRepo: Repository<Message>,
     private readonly notificationsService: NotificationsService,
+    private readonly mailService: MailService,
   ) {}
 
   private async auditLog(
@@ -82,6 +84,7 @@ export class AdminService {
       message: 'Congratulations! Your mentor application has been approved.',
     });
     this.logger.log(`Mentor ${mentor.email} approved by admin ${adminId}`);
+    this.mailService.sendMentorApproved(mentor.email, mentor.name).catch(() => {});
     return mentor;
   }
 
@@ -103,6 +106,7 @@ export class AdminService {
         ? `Your application was not approved. Reason: ${dto.reason}`
         : 'Your mentor application was not approved at this time.',
     });
+    this.mailService.sendMentorRejected(mentor.email, mentor.name, dto.reason).catch(() => {});
     return mentor;
   }
 
@@ -140,6 +144,8 @@ export class AdminService {
     }
 
     const assignments: MentorAssignment[] = [];
+    const assignedMentees: { name: string; track: string }[] = [];
+
     for (const menteeId of dto.menteeIds) {
       const mentee = await this.userRepo.findOne({ where: { id: menteeId } });
       if (!mentee) throw new NotFoundException(`Mentee ${menteeId} not found`);
@@ -167,6 +173,8 @@ export class AdminService {
         title: 'Mentor Assigned',
         message: `You have been assigned a mentor: ${mentor.name}`,
       });
+      this.mailService.sendMenteeAssigned(mentee.email, mentee.name, mentor.name, mentor.track).catch(() => {});
+      assignedMentees.push({ name: mentee.name, track: mentee.track });
     }
     await this.notificationsService.create({
       userId: dto.mentorId,
@@ -174,6 +182,7 @@ export class AdminService {
       title: 'New Mentees Assigned',
       message: `${dto.menteeIds.length} new mentee(s) have been assigned to you.`,
     });
+    this.mailService.sendMentorNewMentees(mentor.email, mentor.name, assignedMentees).catch(() => {});
     await this.auditLog(adminId, 'mentee_assigned', 'mentor_assignment', dto.mentorId, {
       menteeCount: dto.menteeIds.length,
     });
