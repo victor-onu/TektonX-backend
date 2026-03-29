@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>You've Been Assigned a Mentor — TektonX</title>
+  <style>
+    body { margin: 0; padding: 0; background: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+    .header { background: #0f172a; padding: 32px 40px; text-align: center; }
+    .header h1 { color: #f8fafc; margin: 0; font-size: 24px; letter-spacing: -0.5px; }
+    .header span { color: #38bdf8; }
+    .body { padding: 40px; }
+    .body h2 { color: #0f172a; margin-top: 0; font-size: 20px; }
+    .body p { color: #475569; line-height: 1.6; margin: 12px 0; }
+    .mentor-card { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 16px 20px; margin: 20px 0; }
+    .mentor-card .name { font-weight: 700; color: #0f172a; font-size: 16px; }
+    .mentor-card .track { color: #0284c7; font-size: 14px; margin-top: 4px; }
+    .btn { display: inline-block; margin: 24px 0 8px; padding: 12px 28px; background: #0ea5e9; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; }
+    .footer { padding: 20px 40px; background: #f8fafc; text-align: center; }
+    .footer p { color: #94a3b8; font-size: 12px; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Tekton<span>X</span></h1>
+    </div>
+    <div class="body">
+      <h2>You've got a mentor, {{menteeName}}!</h2>
+      <p>Great news — you've been assigned a mentor who will guide you through your TektonX journey.</p>
+      <div class="mentor-card">
+        <div class="name">{{mentorName}}</div>
+        <div class="track">{{mentorTrack}} Track</div>
+      </div>
+      <p>Head to your dashboard to view your learning roadmap, check in with your mentor, and get started.</p>
+      <a href="{{dashboardUrl}}" class="btn">Go to My Dashboard</a>
+    </div>
+    <div class="footer">
+      <p>&copy; {{year}} TektonX Labs. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
