@@ -5,6 +5,7 @@ import { AnnouncementsService } from './announcements.service';
 import { UploadsService, FILE_SIZE_LIMITS } from '../uploads/uploads.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { UserRole } from '../common/enums/user-role.enum';
 import { User } from '../users/entities/user.entity';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
@@ -19,6 +20,7 @@ export class AnnouncementsController {
     private readonly uploadsService: UploadsService,
   ) {}
 
+  @Public()
   @Get()
   getAll() {
     return this.announcementsService.getAll();
