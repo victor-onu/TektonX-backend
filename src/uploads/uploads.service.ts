@@ -97,6 +97,17 @@ export class UploadsService {
     return result.secure_url;
   }
 
+  async uploadProfilePhoto(file: Express.Multer.File): Promise<string> {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException('Profile photo must be an image (JPEG, PNG, WEBP, or GIF).');
+    }
+    if (file.size > FILE_SIZE_LIMITS.image) {
+      throw new BadRequestException('Profile photo must be 5MB or less.');
+    }
+    const result = await uploadToCloudinary(file.buffer, 'profiles', 'image');
+    return result.secure_url;
+  }
+
   async getById(id: string): Promise<Upload> {
     const u = await this.uploadRepo.findOne({ where: { id } });
     if (!u) throw new NotFoundException('Upload not found');

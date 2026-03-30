@@ -47,6 +47,7 @@ export class AuthService {
       title: dto.title,
       experienceYears: dto.experienceYears,
       linkedinUrl: dto.linkedinUrl,
+      profilePhotoUrl: dto.profilePhotoUrl,
     });
 
     if (dto.role === 'mentor') {

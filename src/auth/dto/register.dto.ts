@@ -60,4 +60,9 @@ export class RegisterDto {
   @IsOptional()
   @IsUrl()
   linkedinUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUrl()
+  profilePhotoUrl?: string;
 }
