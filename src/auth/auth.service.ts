@@ -15,6 +15,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserStatus } from '../common/enums/user-status.enum';
+import { ApplicationStatus } from '../common/enums/application-status.enum';
 import { UserRole } from '../common/enums/user-role.enum';
 
 @Injectable()
@@ -32,8 +33,11 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
-    const status =
-      dto.role === 'mentor' ? UserStatus.PENDING_APPROVAL : UserStatus.ACTIVE;
+    const isMentor = dto.role === 'mentor';
+    const status = UserStatus.INACTIVE;
+    const applicationStatus = isMentor
+      ? ApplicationStatus.PENDING_APPROVAL
+      : ApplicationStatus.APPLIED;
 
     const user = await this.usersService.create({
       name: dto.name,
@@ -41,6 +45,7 @@ export class AuthService {
       passwordHash,
       role: dto.role as UserRole,
       status,
+      applicationStatus,
       track: dto.track,
       whatsapp: dto.whatsapp,
       bio: dto.bio,
@@ -50,17 +55,19 @@ export class AuthService {
       profilePhotoUrl: dto.profilePhotoUrl,
     });
 
-    if (dto.role === 'mentor') {
+    if (isMentor) {
       await this.mailService
         .sendMentorApplicationReceived(user.email, user.name)
         .catch(() => {});
     } else {
-      await this.mailService.sendWelcomeMentee(user.email, user.name).catch(() => {});
+      await this.mailService
+        .sendMenteeApplicationReceived(user.email, user.name)
+        .catch(() => {});
     }
 
     return {
       message:
-        dto.role === 'mentor'
+        isMentor
           ? 'Application submitted for review'
           : 'Registration successful',
     };
@@ -72,6 +79,10 @@ export class AuthService {
 
     const valid = await user.validatePassword(dto.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
+
+    if (user.status === UserStatus.SUSPENDED) {
+      throw new UnauthorizedException('Your account has been suspended. Please contact support.');
+    }
 
     const accessToken = this.generateAccessToken(user);
     const refreshToken = this.generateRefreshToken(user);
@@ -128,6 +139,20 @@ export class AuthService {
       if (e instanceof BadRequestException) throw e;
       throw new BadRequestException('Invalid or expired reset token');
     }
+  }
+
+  async activateAccount(token: string, password: string): Promise<{ message: string }> {
+    const user = await this.usersService.findByInviteToken(token);
+    if (!user || !user.inviteTokenExpiry || user.inviteTokenExpiry < new Date()) {
+      throw new BadRequestException('Invalid or expired activation link.');
+    }
+    const passwordHash = await bcrypt.hash(password, 12);
+    await this.usersService.updateById(user.id, {
+      passwordHash,
+      inviteToken: null,
+      inviteTokenExpiry: null,
+    });
+    return { message: 'Account activated. You can now log in.' };
   }
 
   private generateAccessToken(user: any): string {

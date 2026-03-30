@@ -38,4 +38,10 @@ export class AuthController {
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
   }
+
+  @Public()
+  @Post('activate')
+  activate(@Body() body: { token: string; password: string }) {
+    return this.authService.activateAccount(body.token, body.password);
+  }
 }

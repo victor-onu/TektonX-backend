@@ -45,6 +45,10 @@ export class MailService {
     await this.send(to, 'Welcome to TektonX!', 'welcome-mentee', { name, loginUrl });
   }
 
+  async sendMenteeApplicationReceived(to: string, name: string) {
+    await this.send(to, 'TektonX — Application Received', 'mentee-application-received', { name });
+  }
+
   async sendMentorApplicationReceived(to: string, name: string) {
     await this.send(to, 'TektonX — Application Received', 'welcome-mentor-pending', { name });
   }
@@ -60,6 +64,11 @@ export class MailService {
       reason: reason || null,
       contactEmail: 'tektonxlabs@gmail.com',
     });
+  }
+
+  async sendMenteeApproved(to: string, name: string) {
+    const loginUrl = `${this.frontendUrl}/auth/login`;
+    await this.send(to, 'Your TektonX Application Has Been Approved!', 'mentee-approved', { name, loginUrl });
   }
 
   async sendMenteeAssigned(
@@ -101,5 +110,9 @@ export class MailService {
       track,
       dashboardUrl,
     });
+  }
+
+  async sendInvite(to: string, name: string, activateUrl: string) {
+    await this.send(to, "You've Been Invited to TektonX", 'invite', { name, activateUrl });
   }
 }
