@@ -312,6 +312,9 @@ export class AdminService {
     mentee.applicationStatus = newStatus;
     await this.userRepo.save(mentee);
     await this.auditLog(adminId, 'mentee_status_updated', 'user', menteeId, { newStatus });
+    if (newStatus === ApplicationStatus.APPROVED) {
+      this.mailService.sendMenteeApproved(mentee.email, mentee.name).catch(() => {});
+    }
     return mentee;
   }
 
