@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to TektonX</title>
+  <style>
+    body { margin: 0; padding: 0; background: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+    .header { background: #0f172a; padding: 32px 40px; text-align: center; }
+    .header h1 { color: #f8fafc; margin: 0; font-size: 24px; letter-spacing: -0.5px; }
+    .header span { color: #7c3aed; }
+    .body { padding: 40px; }
+    .body h2 { color: #0f172a; margin-top: 0; font-size: 20px; }
+    .body p { color: #475569; line-height: 1.6; margin: 12px 0; }
+    .btn { display: inline-block; margin: 24px 0 8px; padding: 12px 28px; background: #0ea5e9; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; }
+    .footer { padding: 20px 40px; background: #f8fafc; text-align: center; }
+    .footer p { color: #94a3b8; font-size: 12px; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Tekton<span>X</span></h1>
+    </div>
+    <div class="body">
+      <h2>Welcome, {{name}}!</h2>
+      <p>You've been added to the TektonX mentorship program. We're excited to have you on board.</p>
+      <p>Your account is ready. Log in to access your dashboard, track your learning progress, and connect with your mentor.</p>
+      <a href="{{loginUrl}}" class="btn">Go to My Dashboard</a>
+      <p>If the button above doesn't work, copy and paste this link into your browser:<br>
+        <a href="{{loginUrl}}" style="color:#0ea5e9;">{{loginUrl}}</a>
+      </p>
+    </div>
+    <div class="footer">
+      <p>&copy; {{year}} TektonX Labs. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

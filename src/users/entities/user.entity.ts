@@ -5,6 +5,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '../../common/enums/user-role.enum';
 import { UserStatus } from '../../common/enums/user-status.enum';
+import { ApplicationStatus } from '../../common/enums/application-status.enum';
 
 @Entity('users')
 export class User {
@@ -24,8 +25,11 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.MENTEE })
   role: UserRole;
 
-  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  @Column({ type: 'varchar', default: UserStatus.INACTIVE })
   status: UserStatus;
+
+  @Column({ name: 'application_status', type: 'varchar', nullable: true })
+  applicationStatus: ApplicationStatus | null;
 
   @Column()
   track: string;
@@ -50,6 +54,12 @@ export class User {
 
   @Column({ name: 'cohort_id', type: 'uuid', nullable: true })
   cohortId: string | null;
+
+  @Column({ name: 'invite_token', type: 'varchar', nullable: true })
+  inviteToken: string | null;
+
+  @Column({ name: 'invite_token_expiry', type: 'timestamptz', nullable: true })
+  inviteTokenExpiry: Date | null;
 
   @Column({ name: 'milestone1_completed', type: 'int', default: 0 })
   milestone1Completed: number;

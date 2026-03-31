@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Application Received — TektonX</title>
+  <style>
+    body { margin: 0; padding: 0; background: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+    .header { background: #0f172a; padding: 32px 40px; text-align: center; }
+    .header h1 { color: #f8fafc; margin: 0; font-size: 24px; letter-spacing: -0.5px; }
+    .header span { color: #7c3aed; }
+    .body { padding: 40px; }
+    .body h2 { color: #0f172a; margin-top: 0; font-size: 20px; }
+    .body p { color: #475569; line-height: 1.6; margin: 12px 0; }
+    .pipeline { display: flex; align-items: center; justify-content: center; gap: 0; margin: 24px 0; }
+    .step { text-align: center; flex: 1; }
+    .step .dot { width: 32px; height: 32px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+    .step .dot.active { background: #7c3aed; color: #ffffff; }
+    .step .dot.inactive { background: #e2e8f0; color: #94a3b8; }
+    .step .label { font-size: 11px; color: #94a3b8; font-weight: 500; }
+    .step .label.active { color: #7c3aed; font-weight: 700; }
+    .connector { height: 2px; flex: 0.5; background: #e2e8f0; margin-bottom: 22px; }
+    .badge { display: inline-block; padding: 6px 14px; background: #ede9fe; color: #5b21b6; border-radius: 20px; font-size: 13px; font-weight: 600; margin: 8px 0; }
+    .footer { padding: 20px 40px; background: #f8fafc; text-align: center; }
+    .footer p { color: #94a3b8; font-size: 12px; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Tekton<span>X</span></h1>
+    </div>
+    <div class="body">
+      <h2>Application Received, {{name}}!</h2>
+      <span class="badge">Applied</span>
+      <div class="pipeline">
+        <div class="step">
+          <div class="dot active">1</div>
+          <div class="label active">Applied</div>
+        </div>
+        <div class="connector"></div>
+        <div class="step">
+          <div class="dot inactive">2</div>
+          <div class="label">Screened</div>
+        </div>
+        <div class="connector"></div>
+        <div class="step">
+          <div class="dot inactive">3</div>
+          <div class="label">Approved</div>
+        </div>
+        <div class="connector"></div>
+        <div class="step">
+          <div class="dot inactive">4</div>
+          <div class="label">Enrolled</div>
+        </div>
+      </div>
+      <p>Thank you for applying to TektonX! Your application is under review. We'll be in touch with next steps.</p>
+      <p>In the meantime, if you have any questions feel free to reach us at <a href="mailto:tektonxlabs@gmail.com" style="color:#7c3aed;">tektonxlabs@gmail.com</a>.</p>
+    </div>
+    <div class="footer">
+      <p>&copy; {{year}} TektonX Labs. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

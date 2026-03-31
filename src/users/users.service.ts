@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UserRole } from '../common/enums/user-role.enum';
 import { UserStatus } from '../common/enums/user-status.enum';
+import { ApplicationStatus } from '../common/enums/application-status.enum';
 
 export interface UpdateUserData {
   name?: string;
@@ -32,6 +33,10 @@ export class UsersService {
     return this.userRepo.findOne({ where: { email } }) ?? null;
   }
 
+  async findByInviteToken(token: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { inviteToken: token } }) ?? null;
+  }
+
   async create(data: Partial<User>): Promise<User> {
     const user = this.userRepo.create(data);
     return this.userRepo.save(user);
@@ -45,6 +50,10 @@ export class UsersService {
 
   async updatePassword(userId: string, passwordHash: string): Promise<void> {
     await this.userRepo.update(userId, { passwordHash });
+  }
+
+  async updateById(id: string, fields: Partial<User>): Promise<void> {
+    await this.userRepo.update(id, fields);
   }
 
   async updateNotificationPreferences(userId: string, prefs: object): Promise<User> {
@@ -65,6 +74,7 @@ export class UsersService {
     const qb = this.userRepo.createQueryBuilder('user')
       .where('user.role = :role', { role: UserRole.MENTOR })
       .andWhere('user.status = :status', { status: UserStatus.ACTIVE })
+      .andWhere('user.applicationStatus = :appStatus', { appStatus: ApplicationStatus.APPROVED })
       .select([
         'user.id', 'user.name', 'user.track', 'user.bio',
         'user.title', 'user.profilePhotoUrl', 'user.linkedinUrl',

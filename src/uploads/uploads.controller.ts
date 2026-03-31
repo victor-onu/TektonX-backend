@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Post,
   Get,
@@ -10,9 +11,11 @@ import {
   Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { UploadsService, FILE_SIZE_LIMITS } from './uploads.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../common/enums/user-role.enum';
 
@@ -22,9 +25,19 @@ import { UserRole } from '../common/enums/user-role.enum';
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
+  @Public()
+  @Post('profile-photo')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: FILE_SIZE_LIMITS.image } }))
+  async uploadProfilePhoto(@UploadedFile() file: Express.Multer.File): Promise<{ url: string }> {
+    if (!file) throw new BadRequestException('No file provided.');
+    const url = await this.uploadsService.uploadProfilePhoto(file);
+    return { url };
+  }
+
   @Post()
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: FILE_SIZE_LIMITS.document } }))
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: FILE_SIZE_LIMITS.document } }))
   upload(
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: User,

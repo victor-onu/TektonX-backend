@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { AnnouncementsService } from './announcements.service';
 import { UploadsService, FILE_SIZE_LIMITS } from '../uploads/uploads.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { UserRole } from '../common/enums/user-role.enum';
 import { User } from '../users/entities/user.entity';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
@@ -19,6 +21,7 @@ export class AnnouncementsController {
     private readonly uploadsService: UploadsService,
   ) {}
 
+  @Public()
   @Get()
   getAll() {
     return this.announcementsService.getAll();
@@ -46,8 +49,9 @@ export class AnnouncementsController {
   @Roles(UserRole.ADMIN)
   @Post('upload-flier')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: FILE_SIZE_LIMITS.flier } }))
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: FILE_SIZE_LIMITS.flier } }))
   async uploadFlier(@UploadedFile() file: Express.Multer.File): Promise<{ url: string }> {
+    if (!file) throw new BadRequestException('No file provided.');
     const url = await this.uploadsService.uploadFlier(file);
     return { url };
   }

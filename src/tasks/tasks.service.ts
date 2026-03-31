@@ -3,8 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
 import { UsersService } from '../users/users.service';
+import { MailService } from '../mail/mail.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+
+const TASKS_PER_MILESTONE = 16;
 
 @Injectable()
 export class TasksService {
@@ -12,6 +15,7 @@ export class TasksService {
     @InjectRepository(Task)
     private readonly taskRepo: Repository<Task>,
     private readonly usersService: UsersService,
+    private readonly mailService: MailService,
   ) {}
 
   async getTemplates(milestone?: number): Promise<Task[]> {
@@ -48,6 +52,12 @@ export class TasksService {
       where: { userId, milestone: task.milestone, completed: true },
     });
     await this.usersService.updateMilestoneCount(userId, task.milestone, count);
+
+    // Fire program-completion email when milestone 3 is fully done
+    if (task.milestone === 3 && count === TASKS_PER_MILESTONE) {
+      const user = await this.usersService.findById(userId);
+      this.mailService.sendMilestoneCompleted(user.email, user.name, user.track).catch(() => {});
+    }
 
     return task;
   }

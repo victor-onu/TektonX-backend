@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Mentee Assignment — TektonX</title>
+  <style>
+    body { margin: 0; padding: 0; background: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+    .header { background: #0f172a; padding: 32px 40px; text-align: center; }
+    .header h1 { color: #f8fafc; margin: 0; font-size: 24px; letter-spacing: -0.5px; }
+    .header span { color: #7c3aed; }
+    .body { padding: 40px; }
+    .body h2 { color: #0f172a; margin-top: 0; font-size: 20px; }
+    .body p { color: #475569; line-height: 1.6; margin: 12px 0; }
+    .mentee-list { list-style: none; padding: 0; margin: 16px 0; }
+    .mentee-list li { padding: 10px 14px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .mentee-list li .name { font-weight: 600; color: #0f172a; }
+    .mentee-list li .track { color: #64748b; font-size: 13px; }
+    .btn { display: inline-block; margin: 24px 0 8px; padding: 12px 28px; background: #0ea5e9; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; }
+    .footer { padding: 20px 40px; background: #f8fafc; text-align: center; }
+    .footer p { color: #94a3b8; font-size: 12px; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Tekton<span>X</span></h1>
+    </div>
+    <div class="body">
+      <h2>New mentee assignment, {{mentorName}}!</h2>
+      <p>The following mentee(s) have been assigned to you:</p>
+      <ul class="mentee-list">
+        {{#each mentees}}
+        <li>
+          <span class="name">{{this.name}}</span>
+          <span class="track">{{this.track}}</span>
+        </li>
+        {{/each}}
+      </ul>
+      <p>Visit your dashboard to see their progress, schedule sessions, and share resources.</p>
+      <a href="{{dashboardUrl}}" class="btn">Go to My Dashboard</a>
+    </div>
+    <div class="footer">
+      <p>&copy; {{year}} TektonX Labs. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
