@@ -32,7 +32,7 @@ export class MailService {
         to,
         subject,
         template,
-        context: { ...context, year: this.year },
+        context: { ...context, year: this.year, frontendUrl: this.frontendUrl },
       });
       this.logger.log(`[EMAIL SENT] To: ${to} | Subject: ${subject}`);
     } catch (err) {
@@ -50,7 +50,8 @@ export class MailService {
   }
 
   async sendMentorApplicationReceived(to: string, name: string) {
-    await this.send(to, 'TektonX — Application Received', 'welcome-mentor-pending', { name });
+    const dashboardUrl = `${this.frontendUrl}/dashboard/mentor`;
+    await this.send(to, 'TektonX — Application Received', 'welcome-mentor-pending', { name, dashboardUrl });
   }
 
   async sendMentorApproved(to: string, name: string) {

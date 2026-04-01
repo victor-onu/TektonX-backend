@@ -7,13 +7,15 @@
   <style>
     body { margin: 0; padding: 0; background: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
     .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
-    .header { background: #0f172a; padding: 32px 40px; text-align: center; }
-    .header h1 { color: #f8fafc; margin: 0; font-size: 24px; letter-spacing: -0.5px; }
-    .header span { color: #7c3aed; }
+    .header { background: #0f172a; padding: 28px 40px; text-align: center; }
+    .header img { height: 36px; width: auto; display: block; margin: 0 auto; }
     .body { padding: 40px; }
     .body h2 { color: #0f172a; margin-top: 0; font-size: 20px; }
     .body p { color: #475569; line-height: 1.6; margin: 12px 0; }
     .badge { display: inline-block; padding: 6px 14px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 13px; font-weight: 600; margin: 8px 0; }
+    .info-box { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 16px 20px; margin: 20px 0; }
+    .info-box p { color: #4c1d95; margin: 0; font-size: 14px; line-height: 1.5; }
+    .btn { display: inline-block; margin: 20px 0 8px; padding: 12px 28px; background: #7c3aed; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; }
     .footer { padding: 20px 40px; background: #f8fafc; text-align: center; }
     .footer p { color: #94a3b8; font-size: 12px; margin: 0; }
   </style>
@@ -21,14 +23,18 @@
 <body>
   <div class="wrapper">
     <div class="header">
-      <h1>Tekton<span>X</span></h1>
+      <img src="{{frontendUrl}}/purple%20horizontal%20logo%20.svg" alt="TektonX" style="height:36px;width:auto;display:block;margin:0 auto;" />
     </div>
     <div class="body">
       <h2>Application Received, {{name}}!</h2>
       <span class="badge">Pending Review</span>
-      <p>Thank you for applying to become a TektonX mentor. We've received your application and our team will review it shortly.</p>
-      <p>You'll receive another email once a decision has been made. This typically takes 1–3 business days.</p>
-      <p>In the meantime, if you have any questions feel free to reach us at <a href="mailto:tektonxlabs@gmail.com" style="color:#0ea5e9;">tektonxlabs@gmail.com</a>.</p>
+      <p>Thank you for applying to become a TektonX mentor. We've received your application and our team will review it carefully.</p>
+      <p>You'll receive another email once a decision has been made. This typically takes <strong>1–3 business days</strong>.</p>
+      <div class="info-box">
+        <p>In the meantime, you can log into your dashboard at any time to follow up on the status of your application.</p>
+      </div>
+      <a href="{{dashboardUrl}}" class="btn">Go to My Dashboard</a>
+      <p>If you have any questions, feel free to reach us at <a href="mailto:tektonxlabs@gmail.com" style="color:#7c3aed;">tektonxlabs@gmail.com</a>.</p>
     </div>
     <div class="footer">
       <p>&copy; {{year}} TektonX Labs. All rights reserved.</p>
