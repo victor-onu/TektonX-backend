@@ -25,6 +25,16 @@ import { NotificationType } from '../common/enums/notification-type.enum';
 import { AssignMenteesDto } from './dto/assign-mentees.dto';
 import { RejectMentorDto } from './dto/reject-mentor.dto';
 
+const VALID_TRACKS = [
+  'Software Development (Frontend & Backend)',
+  'UI/UX Design',
+  'Mobile App Development',
+  'Product/Project Management',
+  'Quality Assurance (QA)',
+  'Data (Analysis/Science)',
+  'Cybersecurity',
+];
+
 @Injectable()
 export class AdminService {
   private readonly logger = new Logger(AdminService.name);
@@ -360,6 +370,11 @@ export class AdminService {
     const errors: string[] = [];
 
     for (const row of rows) {
+      if (!VALID_TRACKS.includes(row.track)) {
+        failed++;
+        errors.push(`${row.email}: Invalid track "${row.track}". Must be one of: ${VALID_TRACKS.join(' | ')}`);
+        continue;
+      }
       try {
         await this.inviteMentee(row, adminId);
         sent++;

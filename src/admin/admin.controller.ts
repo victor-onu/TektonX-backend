@@ -125,7 +125,18 @@ export class AdminController {
 
   @Get('invite/sample-csv')
   getSampleCsv(@Res() res: Response) {
-    const csv = 'name,email,track\nJohn Doe,john@example.com,Software Development (Frontend & Backend)\nJane Doe,jane@example.com,UI/UX Design\n';
+    const csv = [
+      '# NOTE: The "track" column must be one of the exact values listed below (case-sensitive):',
+      '# Software Development (Frontend & Backend) | UI/UX Design | Mobile App Development | Product/Project Management | Quality Assurance (QA) | Data (Analysis/Science) | Cybersecurity',
+      'name,email,track',
+      'John Doe,john@example.com,Software Development (Frontend & Backend)',
+      'Jane Doe,jane@example.com,UI/UX Design',
+      'Alex Smith,alex@example.com,Mobile App Development',
+      'Sam Taylor,sam@example.com,Product/Project Management',
+      'Chris Lee,chris@example.com,Quality Assurance (QA)',
+      'Morgan Brown,morgan@example.com,Data (Analysis/Science)',
+      'Riley Green,riley@example.com,Cybersecurity',
+    ].join('\n') + '\n';
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="tektonx-invite-sample.csv"');
     res.send(csv);
