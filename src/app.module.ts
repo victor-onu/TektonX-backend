@@ -29,6 +29,7 @@ import { MailModule } from './mail/mail.module';
 import { BootstrapModule } from './bootstrap/bootstrap.module';
 import { HealthModule } from './health/health.module';
 import { CohortsModule } from './cohorts/cohorts.module';
+import { PartnershipsModule } from './partnerships/partnerships.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { CohortsModule } from './cohorts/cohorts.module';
     BootstrapModule,
     HealthModule,
     CohortsModule,
+    PartnershipsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

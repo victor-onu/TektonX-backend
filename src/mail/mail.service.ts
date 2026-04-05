@@ -116,4 +116,29 @@ export class MailService {
   async sendInvite(to: string, name: string, activateUrl: string) {
     await this.send(to, "You've Been Invited to TektonX", 'invite', { name, activateUrl });
   }
+
+  async sendPartnershipConfirmation(to: string, contactName: string, companyName: string) {
+    await this.send(
+      to,
+      'Partnership Inquiry Received — TektonX',
+      'partnership-confirmation',
+      { contactName, companyName },
+    );
+  }
+
+  async sendPartnershipAdminNotification(
+    companyName: string,
+    contactName: string,
+    email: string,
+    partnershipType: string,
+    message?: string,
+  ) {
+    const adminEmail = this.config.get<string>('MAIL_USER', 'tektonxlabs@gmail.com');
+    await this.send(
+      adminEmail,
+      `New Partnership Inquiry — ${companyName}`,
+      'partnership-admin-notify',
+      { companyName, contactName, email, partnershipType, message: message ?? null },
+    );
+  }
 }
