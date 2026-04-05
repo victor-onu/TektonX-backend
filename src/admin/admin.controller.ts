@@ -31,7 +31,8 @@ import { ChangeRoleDto } from './dto/change-role.dto';
 
 async function parseXlsx(buffer: Buffer): Promise<{ name: string; email: string; track: string }[]> {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer as unknown as Buffer);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await workbook.xlsx.load(buffer as any);
   const sheet = workbook.worksheets[0];
   const dataRows: { name: string; email: string; track: string }[] = [];
   let rowCount = 0;
