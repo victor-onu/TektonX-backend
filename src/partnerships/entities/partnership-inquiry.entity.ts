@@ -1,28 +1,28 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('partnership_inquiries')
 export class PartnershipInquiry {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: string;
 
-  @Column()
-  companyName: string
+  @Column({ type: 'varchar' })
+  companyName: string;
 
-  @Column()
-  contactName: string
+  @Column({ type: 'varchar' })
+  contactName: string;
 
-  @Column()
-  email: string
+  @Column({ type: 'varchar' })
+  email: string;
 
-  @Column({ nullable: true })
-  phone: string | null
+  @Column({ type: 'varchar', nullable: true })
+  phone: string | null;
 
-  @Column()
-  partnershipType: string  // 'sponsor' | 'hiring' | 'both'
+  @Column({ type: 'varchar' })
+  partnershipType: string;
 
-  @Column({ nullable: true, type: 'text' })
-  message: string | null
+  @Column({ type: 'text', nullable: true })
+  message: string | null;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
 }
