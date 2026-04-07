@@ -18,6 +18,7 @@ import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import * as ExcelJS from 'exceljs';
 import { AdminService } from './admin.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -28,14 +29,28 @@ import { RejectMentorDto } from './dto/reject-mentor.dto';
 import { AssignMenteesDto } from './dto/assign-mentees.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
 
-function parseCsv(csv: string): { name: string; email: string; track: string }[] {
-  const lines = csv.split('\n').map(l => l.trim()).filter(Boolean);
-  if (lines.length < 2) return [];
-  // Skip header row
-  return lines.slice(1).map(line => {
-    const [name, email, track] = line.split(',').map(s => s.trim());
-    return { name, email, track };
-  }).filter(r => r.name && r.email && r.track);
+async function parseXlsx(buffer: Buffer): Promise<{ name: string; email: string; track: string }[]> {
+  const workbook = new ExcelJS.Workbook();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await workbook.xlsx.load(buffer as any);
+  const sheet = workbook.worksheets[0];
+  const dataRows: { name: string; email: string; track: string }[] = [];
+  let rowCount = 0;
+  sheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return; // skip header
+    rowCount++;
+    if (rowCount > 100) return;
+    const name = (row.getCell(1).text ?? '').trim();
+    const email = (row.getCell(2).text ?? '').trim();
+    const track = (row.getCell(3).text ?? '').trim();
+    if (name && email && track) {
+      dataRows.push({ name, email, track });
+    }
+  });
+  if (rowCount > 100) {
+    throw new BadRequestException('CSV file must not exceed 100 rows.');
+  }
+  return dataRows;
 }
 
 @ApiTags('admin')
@@ -117,18 +132,55 @@ export class AdminController {
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() admin: User,
   ) {
-    if (!file) throw new BadRequestException('No CSV file provided.');
-    const csv = file.buffer.toString('utf-8');
-    const rows = parseCsv(csv);
+    if (!file) throw new BadRequestException('No file provided.');
+    const rows = await parseXlsx(file.buffer);
     return this.adminService.inviteMenteeBulk(rows, admin.id);
   }
 
-  @Get('invite/sample-csv')
-  getSampleCsv(@Res() res: Response) {
-    const csv = 'name,email,track\nJohn Doe,john@example.com,Software Development (Frontend & Backend)\nJane Doe,jane@example.com,UI/UX Design\n';
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="tektonx-invite-sample.csv"');
-    res.send(csv);
+  @Get('invite/sample-xlsx')
+  async getSampleXlsx(@Res() res: Response) {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Invites');
+
+    sheet.columns = [
+      { width: 25 },
+      { width: 35 },
+      { width: 45 },
+    ];
+
+    // Header row
+    const headerRow = sheet.addRow(['name', 'email', 'track']);
+    headerRow.font = { bold: true };
+
+    // Note row
+    const noteRow = sheet.addRow(['# Replace these rows with real data. Delete this row before uploading.', '', '']);
+    noteRow.font = { italic: true, color: { argb: 'FF888888' } };
+
+    // Example data rows
+    sheet.addRow(['John Doe', 'john@example.com', 'Software Development (Frontend & Backend)']);
+    sheet.addRow(['Jane Doe', 'jane@example.com', 'UI/UX Design']);
+    sheet.addRow(['Alex Smith', 'alex@example.com', 'Mobile App Development']);
+    sheet.addRow(['Sam Taylor', 'sam@example.com', 'Product/Project Management']);
+    sheet.addRow(['Chris Lee', 'chris@example.com', 'Quality Assurance (QA)']);
+    sheet.addRow(['Morgan Brown', 'morgan@example.com', 'Data (Analysis/Science)']);
+    sheet.addRow(['Riley Green', 'riley@example.com', 'Cybersecurity']);
+
+    // Dropdown validation for column C, rows 2–101
+    for (let i = 2; i <= 101; i++) {
+      sheet.getCell(`C${i}`).dataValidation = {
+        type: 'list',
+        allowBlank: false,
+        formulae: ['"Software Development (Frontend & Backend),UI/UX Design,Mobile App Development,Product/Project Management,Quality Assurance (QA),Data (Analysis/Science),Cybersecurity"'],
+        showErrorMessage: true,
+        errorTitle: 'Invalid Track',
+        error: 'Please select a valid track from the dropdown.',
+      };
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="tektonx-invite-template.xlsx"');
+    res.send(Buffer.from(buffer));
   }
 
   // Stats & Users

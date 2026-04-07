@@ -4,43 +4,50 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Application Approved — TektonX</title>
-  <style>
-    body { margin: 0; padding: 0; background: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
-    .header { background: #0f172a; padding: 32px 40px; text-align: center; }
-    .header img { height: 36px; width: auto; display: block; margin: 0 auto; }
-    .body { padding: 40px; }
-    .body h2 { color: #0f172a; margin-top: 0; font-size: 20px; }
-    .body p { color: #475569; line-height: 1.6; margin: 12px 0; }
-    .badge { display: inline-block; padding: 6px 14px; background: #dcfce7; color: #166534; border-radius: 20px; font-size: 13px; font-weight: 600; margin: 8px 0; }
-    .info-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px 20px; margin: 20px 0; }
-    .info-box p { color: #166534; margin: 0; font-size: 14px; }
-    .btn { display: inline-block; margin: 24px 0 8px; padding: 12px 28px; background: #7c3aed; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; }
-    .footer { padding: 20px 40px; background: #f8fafc; text-align: center; }
-    .footer p { color: #94a3b8; font-size: 12px; margin: 0; }
-  </style>
 </head>
-<body>
-  <div class="wrapper">
-    <div class="header">
-      <img src="{{frontendUrl}}/logo-white-horizontal.svg" alt="TektonX" style="height:72px;width:auto;display:block;margin:0 auto;" />
-    </div>
-    <div class="body">
-      <h2>Great news, {{name}}!</h2>
-      <span class="badge">Approved</span>
-      <p>Your TektonX application has been approved! You're on the waitlist for the next cohort.</p>
-      <div class="info-box">
-        <p>You'll receive another email once a mentor and cohort have been assigned to you. In the meantime, log in to check your status.</p>
-      </div>
-      <p>We're excited to have you in the TektonX community. Stay tuned for your cohort assignment!</p>
-      <a href="{{loginUrl}}" class="btn">Check My Status</a>
-      <p>If the button above doesn't work, copy and paste this link into your browser:<br>
-        <a href="{{loginUrl}}" style="color:#7c3aed;">{{loginUrl}}</a>
-      </p>
-    </div>
-    <div class="footer">
-      <p>&copy; {{year}} TektonX Labs. All rights reserved.</p>
-    </div>
-  </div>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f4f5" style="background-color:#f4f4f5;">
+    <tr><td align="center" style="padding:40px 20px;">
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:8px;overflow:hidden;">
+
+        <!-- HEADER -->
+        <tr>
+          <td align="center" bgcolor="#0f172a" style="background-color:#0f172a;padding:28px 40px;">
+            <img src="{{frontendUrl}}/logo-white-horizontal.svg" alt="TektonX" width="180" style="display:block;height:auto;" />
+          </td>
+        </tr>
+
+        <!-- BODY -->
+        <tr>
+          <td style="padding:40px;background-color:#ffffff;">
+            <h2 style="color:#0f172a;margin:0 0 8px 0;font-size:20px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Great news, {{name}}!</h2>
+            <span style="display:inline-block;padding:6px 14px;background-color:#dcfce7;color:#166534;border-radius:20px;font-size:13px;font-weight:600;margin:8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Approved</span>
+            <p style="color:#475569;line-height:1.6;margin:12px 0;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Your TektonX application has been approved! You're on the waitlist for the next cohort.</p>
+
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+              <tr><td bgcolor="#f0fdf4" style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px 20px;">
+                <p style="color:#166534;margin:0;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">You'll receive another email once a mentor and cohort have been assigned to you. In the meantime, log in to check your status.</p>
+              </td></tr>
+            </table>
+
+            <p style="color:#475569;line-height:1.6;margin:12px 0;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">We're excited to have you in the TektonX community. Stay tuned for your cohort assignment!</p>
+
+            <a href="{{loginUrl}}" style="display:inline-block;margin:20px 0 8px;padding:12px 28px;background-color:#7c3aed;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;font-size:15px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Check My Status</a>
+
+            <p style="color:#475569;line-height:1.6;margin:12px 0;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">If the button above doesn't work, copy and paste this link into your browser:<br /><a href="{{loginUrl}}" style="color:#7c3aed;word-break:break-all;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">{{loginUrl}}</a></p>
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td align="center" bgcolor="#f8fafc" style="background-color:#f8fafc;padding:20px 40px;">
+            <p style="color:#94a3b8;font-size:12px;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">&copy; {{year}} TektonX Labs. All rights reserved.</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>
