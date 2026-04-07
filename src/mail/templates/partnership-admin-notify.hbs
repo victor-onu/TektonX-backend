@@ -4,44 +4,73 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>New Partnership Inquiry</title>
-  <style>
-    body { margin: 0; padding: 0; background: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
-    .header { background: #0f172a; padding: 28px 40px; text-align: center; }
-    .header img { height: 72px; width: auto; display: block; margin: 0 auto; }
-    .body { padding: 40px; }
-    .body h2 { color: #0f172a; margin-top: 0; font-size: 20px; }
-    .body p { color: #475569; line-height: 1.6; margin: 12px 0; }
-    .detail-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-    .detail-label { font-weight: 600; color: #0f172a; font-size: 13px; min-width: 130px; }
-    .detail-value { color: #475569; font-size: 13px; }
-    .message-box { background: #f8fafc; border-left: 3px solid #7c3aed; padding: 12px 16px; border-radius: 4px; margin: 16px 0; color: #475569; font-size: 14px; line-height: 1.6; }
-    .footer { padding: 20px 40px; background: #f8fafc; text-align: center; }
-    .footer p { color: #94a3b8; font-size: 12px; margin: 0; }
-  </style>
 </head>
-<body>
-  <div class="wrapper">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a;"><tr><td align="center" bgcolor="#0f172a" style="padding:28px 40px;">
-      <img src="{{frontendUrl}}/logo-white-horizontal.svg" alt="TektonX" style="height:72px;width:auto;display:block;margin:0 auto;" />
-    </td></tr></table>
-    <div class="body">
-      <h2>New Partnership Inquiry</h2>
-      <p>A new partnership inquiry has been submitted. Details below:</p>
-      <div>
-        <div class="detail-row"><span class="detail-label">Company</span><span class="detail-value">{{companyName}}</span></div>
-        <div class="detail-row"><span class="detail-label">Contact Person</span><span class="detail-value">{{contactName}}</span></div>
-        <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">{{email}}</span></div>
-        <div class="detail-row"><span class="detail-label">Partnership Type</span><span class="detail-value" style="text-transform:capitalize;">{{partnershipType}}</span></div>
-      </div>
-      {{#if message}}
-      <p style="margin-top:20px;font-weight:600;color:#0f172a;font-size:14px;">Message:</p>
-      <div class="message-box">{{message}}</div>
-      {{/if}}
-    </div>
-    <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" bgcolor="#f8fafc" style="background:#f8fafc;padding:20px 40px;">
-      <p style="color:#94a3b8;font-size:12px;margin:0;">&copy; {{year}} TektonX Labs. All rights reserved.</p>
-    </td></tr></table>
-  </div>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f4f5" style="background-color:#f4f4f5;">
+    <tr><td align="center" style="padding:40px 20px;">
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:8px;overflow:hidden;">
+
+        <!-- HEADER -->
+        <tr>
+          <td align="center" bgcolor="#0f172a" style="background-color:#0f172a;padding:28px 40px;">
+            <img src="{{frontendUrl}}/logo-white-horizontal.svg" alt="TektonX" width="180" style="display:block;height:auto;" />
+          </td>
+        </tr>
+
+        <!-- BODY -->
+        <tr>
+          <td style="padding:40px;background-color:#ffffff;">
+            <h2 style="color:#0f172a;margin:0 0 8px 0;font-size:20px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">New Partnership Inquiry</h2>
+            <p style="color:#475569;line-height:1.6;margin:12px 0;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">A new partnership inquiry has been submitted. Details below:</p>
+
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;">
+              <tr><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+                <table width="100%" cellpadding="0" cellspacing="0"><tr>
+                  <td style="font-weight:600;color:#0f172a;font-size:13px;width:130px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Company</td>
+                  <td style="color:#475569;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">{{companyName}}</td>
+                </tr></table>
+              </td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+                <table width="100%" cellpadding="0" cellspacing="0"><tr>
+                  <td style="font-weight:600;color:#0f172a;font-size:13px;width:130px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Contact Person</td>
+                  <td style="color:#475569;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">{{contactName}}</td>
+                </tr></table>
+              </td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+                <table width="100%" cellpadding="0" cellspacing="0"><tr>
+                  <td style="font-weight:600;color:#0f172a;font-size:13px;width:130px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Email</td>
+                  <td style="color:#475569;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">{{email}}</td>
+                </tr></table>
+              </td></tr>
+              <tr><td style="padding:10px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0"><tr>
+                  <td style="font-weight:600;color:#0f172a;font-size:13px;width:130px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Partnership Type</td>
+                  <td style="color:#475569;font-size:13px;text-transform:capitalize;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">{{partnershipType}}</td>
+                </tr></table>
+              </td></tr>
+            </table>
+
+            {{#if message}}
+            <p style="margin-top:20px;font-weight:600;color:#0f172a;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Message:</p>
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr><td style="border-left:3px solid #7c3aed;background-color:#f8fafc;padding:12px 16px;border-radius:4px;">
+                <p style="color:#475569;font-size:14px;line-height:1.6;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">{{message}}</p>
+              </td></tr>
+            </table>
+            {{/if}}
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td align="center" bgcolor="#f8fafc" style="background-color:#f8fafc;padding:20px 40px;">
+            <p style="color:#94a3b8;font-size:12px;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">&copy; {{year}} TektonX Labs. All rights reserved.</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>
