@@ -33,6 +33,7 @@ const VALID_TRACKS = [
   'Quality Assurance (QA)',
   'Data (Analysis/Science)',
   'Cybersecurity',
+  'Web3',
 ];
 
 @Injectable()
