@@ -164,13 +164,14 @@ export class AdminController {
     sheet.addRow(['Chris Lee', 'chris@example.com', 'Quality Assurance (QA)']);
     sheet.addRow(['Morgan Brown', 'morgan@example.com', 'Data (Analysis/Science)']);
     sheet.addRow(['Riley Green', 'riley@example.com', 'Cybersecurity']);
+    sheet.addRow(['Jordan Blake', 'jordan@example.com', 'Web3']);
 
     // Dropdown validation for column C, rows 2–101
     for (let i = 2; i <= 101; i++) {
       sheet.getCell(`C${i}`).dataValidation = {
         type: 'list',
         allowBlank: false,
-        formulae: ['"Software Development (Frontend & Backend),UI/UX Design,Mobile App Development,Product/Project Management,Quality Assurance (QA),Data (Analysis/Science),Cybersecurity"'],
+        formulae: ['"Software Development (Frontend & Backend),UI/UX Design,Mobile App Development,Product/Project Management,Quality Assurance (QA),Data (Analysis/Science),Cybersecurity,Web3"'],
         showErrorMessage: true,
         errorTitle: 'Invalid Track',
         error: 'Please select a valid track from the dropdown.',
