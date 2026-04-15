@@ -352,6 +352,7 @@ export class AdminService {
       passwordHash: '',
       inviteToken,
       inviteTokenExpiry,
+      invitedAt: new Date(),
     });
     await this.userRepo.save(user);
 

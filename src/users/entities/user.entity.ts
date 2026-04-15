@@ -61,6 +61,9 @@ export class User {
   @Column({ name: 'invite_token_expiry', type: 'timestamptz', nullable: true })
   inviteTokenExpiry: Date | null;
 
+  @Column({ name: 'invited_at', type: 'timestamptz', nullable: true })
+  invitedAt: Date | null;
+
   @Column({ name: 'milestone1_completed', type: 'int', default: 0 })
   milestone1Completed: number;
 
