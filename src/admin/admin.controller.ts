@@ -95,6 +95,21 @@ export class AdminController {
     return this.adminService.updateMenteeApplicationStatus(id, body.status, admin.id);
   }
 
+  @Patch('mentees/:id/graduate')
+  graduateMentee(@Param('id') id: string, @CurrentUser() admin: User) {
+    return this.adminService.graduateMentee(id, admin.id);
+  }
+
+  @Post('cohorts/:cohortId/graduate-all')
+  graduateCohort(@Param('cohortId') cohortId: string, @CurrentUser() admin: User) {
+    return this.adminService.graduateCohort(cohortId, admin.id);
+  }
+
+  @Patch('mentors/:id/alumni')
+  markMentorAlumni(@Param('id') id: string, @CurrentUser() admin: User) {
+    return this.adminService.markMentorAlumni(id, admin.id);
+  }
+
   // Assignments
   @Get('assignments')
   getAssignments() {

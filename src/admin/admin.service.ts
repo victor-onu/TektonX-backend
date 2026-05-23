@@ -168,6 +168,9 @@ export class AdminService {
     for (const menteeId of dto.menteeIds) {
       const mentee = await this.userRepo.findOne({ where: { id: menteeId } });
       if (!mentee) throw new NotFoundException(`Mentee ${menteeId} not found`);
+      if (mentee.applicationStatus === ApplicationStatus.GRADUATED) {
+        throw new BadRequestException(`${mentee.name} has graduated and cannot be reassigned`);
+      }
       const existing = await this.assignmentRepo.findOne({ where: { menteeId } });
       if (existing) {
         existing.mentorId = dto.mentorId;
@@ -327,6 +330,53 @@ export class AdminService {
       this.mailService.sendMenteeApproved(mentee.email, mentee.name).catch(() => {});
     }
     return mentee;
+  }
+
+  // ── Graduation / Alumni ───────────────────────────────────────────────────────
+
+  async graduateMentee(menteeId: string, adminId: string): Promise<User> {
+    const mentee = await this.userRepo.findOne({ where: { id: menteeId } });
+    if (!mentee) throw new NotFoundException('Mentee not found');
+    if (mentee.role !== UserRole.MENTEE) throw new BadRequestException('User is not a mentee');
+    if (mentee.applicationStatus === ApplicationStatus.GRADUATED) {
+      throw new BadRequestException('Mentee is already graduated');
+    }
+    mentee.applicationStatus = ApplicationStatus.GRADUATED;
+    await this.userRepo.save(mentee);
+    await this.auditLog(adminId, 'mentee_graduated', 'user', menteeId, { email: mentee.email });
+    return mentee;
+  }
+
+  async graduateCohort(cohortId: string, adminId: string): Promise<{ graduated: number }> {
+    const mentees = await this.userRepo.find({
+      where: {
+        cohortId,
+        role: UserRole.MENTEE,
+        applicationStatus: ApplicationStatus.ENROLLED,
+      },
+    });
+    if (mentees.length === 0) {
+      return { graduated: 0 };
+    }
+    for (const mentee of mentees) {
+      mentee.applicationStatus = ApplicationStatus.GRADUATED;
+    }
+    await this.userRepo.save(mentees);
+    await this.auditLog(adminId, 'cohort_graduated', 'cohort', cohortId, { count: mentees.length });
+    return { graduated: mentees.length };
+  }
+
+  async markMentorAlumni(mentorId: string, adminId: string): Promise<User> {
+    const mentor = await this.userRepo.findOne({ where: { id: mentorId } });
+    if (!mentor) throw new NotFoundException('Mentor not found');
+    if (mentor.role !== UserRole.MENTOR) throw new BadRequestException('User is not a mentor');
+    if (mentor.status === UserStatus.ALUMNI) {
+      throw new BadRequestException('Mentor is already marked as alumni');
+    }
+    mentor.status = UserStatus.ALUMNI;
+    await this.userRepo.save(mentor);
+    await this.auditLog(adminId, 'mentor_alumni', 'user', mentorId, { email: mentor.email });
+    return mentor;
   }
 
   // ── Invite System ─────────────────────────────────────────────────────────────
