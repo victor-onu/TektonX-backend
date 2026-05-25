@@ -28,6 +28,7 @@ import { User } from '../users/entities/user.entity';
 import { RejectMentorDto } from './dto/reject-mentor.dto';
 import { AssignMenteesDto } from './dto/assign-mentees.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
+import { BroadcastDto } from './dto/broadcast.dto';
 
 async function parseXlsx(buffer: Buffer): Promise<{ name: string; email: string; track: string }[]> {
   const workbook = new ExcelJS.Workbook();
@@ -108,6 +109,16 @@ export class AdminController {
   @Patch('mentors/:id/alumni')
   markMentorAlumni(@Param('id') id: string, @CurrentUser() admin: User) {
     return this.adminService.markMentorAlumni(id, admin.id);
+  }
+
+  @Post('broadcast/preview')
+  previewBroadcast(@Body() dto: BroadcastDto) {
+    return this.adminService.previewBroadcast(dto);
+  }
+
+  @Post('broadcast')
+  sendBroadcast(@Body() dto: BroadcastDto, @CurrentUser() admin: User) {
+    return this.adminService.sendBroadcast(dto, admin.id);
   }
 
   // Assignments

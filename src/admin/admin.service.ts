@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { marked } from 'marked';
 import { User } from '../users/entities/user.entity';
 import { MentorAssignment } from './entities/mentor-assignment.entity';
 import { AuditLog } from '../audit-log/entities/audit-log.entity';
@@ -24,6 +25,7 @@ import { ApplicationStatus } from '../common/enums/application-status.enum';
 import { NotificationType } from '../common/enums/notification-type.enum';
 import { AssignMenteesDto } from './dto/assign-mentees.dto';
 import { RejectMentorDto } from './dto/reject-mentor.dto';
+import { BroadcastDto } from './dto/broadcast.dto';
 
 const VALID_TRACKS = [
   'Software Development (Frontend & Backend)',
@@ -525,5 +527,81 @@ export class AdminService {
       .orderBy('a.createdAt', 'DESC');
     const [data, total] = await qb.getManyAndCount();
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  // ── Broadcast Email ───────────────────────────────────────────────────────────
+
+  private buildBroadcastQuery(dto: BroadcastDto) {
+    const roleEnums = dto.roles.map((r) => {
+      if (r === 'mentor') return UserRole.MENTOR;
+      if (r === 'admin') return UserRole.ADMIN;
+      return UserRole.MENTEE;
+    });
+
+    const qb = this.userRepo.createQueryBuilder('u')
+      .where('u.role IN (:...roles)', { roles: roleEnums })
+      .andWhere('u.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: [UserStatus.SUSPENDED, UserStatus.ALUMNI],
+      })
+      .andWhere(
+        `(u.applicationStatus IS NULL OR u.applicationStatus != :graduated)`,
+        { graduated: ApplicationStatus.GRADUATED },
+      )
+      .andWhere(`u.passwordHash != ''`);
+
+    if (dto.tracks && dto.tracks.length > 0) {
+      qb.andWhere('u.track IN (:...tracks)', { tracks: dto.tracks });
+    }
+    if (dto.cohortIds && dto.cohortIds.length > 0) {
+      qb.andWhere('u.cohortId IN (:...cohortIds)', { cohortIds: dto.cohortIds });
+    }
+    return qb;
+  }
+
+  async previewBroadcast(dto: BroadcastDto): Promise<{ count: number }> {
+    const qb = this.buildBroadcastQuery(dto);
+    const count = await qb.getCount();
+    return { count };
+  }
+
+  async sendBroadcast(
+    dto: BroadcastDto,
+    adminId: string,
+  ): Promise<{ sent: number; failed: number }> {
+    const qb = this.buildBroadcastQuery(dto);
+    const recipients = await qb.select(['u.id', 'u.name', 'u.email']).getMany();
+
+    if (recipients.length === 0) {
+      return { sent: 0, failed: 0 };
+    }
+
+    const htmlBody = await marked.parse(dto.body, { breaks: true, async: true });
+
+    let sent = 0;
+    let failed = 0;
+    const batchSize = 25;
+    for (let i = 0; i < recipients.length; i += batchSize) {
+      const batch = recipients.slice(i, i + batchSize);
+      const results = await Promise.allSettled(
+        batch.map((u) =>
+          this.mailService.sendBroadcast(u.email, u.name, dto.subject, htmlBody as string),
+        ),
+      );
+      for (const r of results) {
+        if (r.status === 'fulfilled') sent++;
+        else failed++;
+      }
+    }
+
+    await this.auditLog(adminId, 'broadcast_sent', 'broadcast', adminId, {
+      subject: dto.subject,
+      roles: dto.roles,
+      tracks: dto.tracks ?? null,
+      cohortIds: dto.cohortIds ?? null,
+      sent,
+      failed,
+    });
+
+    return { sent, failed };
   }
 }

@@ -126,6 +126,10 @@ export class MailService {
     );
   }
 
+  async sendBroadcast(to: string, name: string, subject: string, htmlBody: string) {
+    await this.send(to, subject, 'broadcast', { name, subject, body: htmlBody });
+  }
+
   async sendPartnershipAdminNotification(
     companyName: string,
     contactName: string,
