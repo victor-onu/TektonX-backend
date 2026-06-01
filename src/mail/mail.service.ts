@@ -130,6 +130,22 @@ export class MailService {
     await this.send(to, subject, 'broadcast', { name, subject, body: htmlBody });
   }
 
+  async sendWeeklyDigestMentee(to: string, context: Record<string, unknown>) {
+    const week = context.week as number;
+    await this.send(to, `Week ${week} on TektonX — Your Focus This Week`, 'weekly-digest-mentee', {
+      ...context,
+      dashboardUrl: `${this.frontendUrl}/dashboard/mentee`,
+    });
+  }
+
+  async sendWeeklyDigestMentor(to: string, context: Record<string, unknown>) {
+    const week = context.week as number;
+    await this.send(to, `Week ${week} Mentor Brief — What Your Mentees Are Working On`, 'weekly-digest-mentor', {
+      ...context,
+      dashboardUrl: `${this.frontendUrl}/dashboard/mentor`,
+    });
+  }
+
   async sendPartnershipAdminNotification(
     companyName: string,
     contactName: string,
