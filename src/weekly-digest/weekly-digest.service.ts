@@ -106,7 +106,9 @@ export class WeeklyDigestService {
           programEvent: bundle.programEvent,
           milestoneCompleted,
           milestoneCompletedSingular: milestoneCompleted === 1,
-          intro: pickByWeek(MENTEE_INTROS, week).replace('{track}', mentee.track),
+          intro: pickByWeek(MENTEE_INTROS, week)
+            .replace('{week}', String(week))
+            .replace('{track}', mentee.track),
           outro: pickByWeek(MENTEE_OUTROS, week),
         });
         menteesSent++;
@@ -142,9 +144,11 @@ export class WeeklyDigestService {
 
       const singular = menteeList.length === 1;
       const mentorIntro = pickByWeek(MENTOR_INTROS, week)
-        .replace('{plural}', singular ? '' : 's')
-        .replace('{verb}', singular ? 'is' : 'are');
-      const mentorOutro = pickByWeek(MENTOR_OUTROS, week);
+        .replace('{week}', String(week))
+        .replaceAll('{plural}', singular ? '' : 's')
+        .replaceAll('{verb}', singular ? 'is' : 'are');
+      const mentorOutro = pickByWeek(MENTOR_OUTROS, week)
+        .replaceAll('{plural}', singular ? '' : 's');
 
       try {
         await this.mailService.sendWeeklyDigestMentor(mentor.email, {
@@ -187,7 +191,9 @@ export class WeeklyDigestService {
       name: 'Friend',
       milestoneCompleted: 0,
       milestoneCompletedSingular: false,
-      intro: pickByWeek(MENTEE_INTROS, week).replace('{track}', track),
+      intro: pickByWeek(MENTEE_INTROS, week)
+        .replace('{week}', String(week))
+        .replace('{track}', track),
       outro: pickByWeek(MENTEE_OUTROS, week),
     };
   }
@@ -212,8 +218,11 @@ export class WeeklyDigestService {
       menteeCountSingular: false,
       trackContent,
       programEvent,
-      intro: pickByWeek(MENTOR_INTROS, week).replace('{plural}', 's').replace('{verb}', 'are'),
-      outro: pickByWeek(MENTOR_OUTROS, week),
+      intro: pickByWeek(MENTOR_INTROS, week)
+        .replace('{week}', String(week))
+        .replaceAll('{plural}', 's')
+        .replaceAll('{verb}', 'are'),
+      outro: pickByWeek(MENTOR_OUTROS, week).replaceAll('{plural}', 's'),
     };
   }
 }
