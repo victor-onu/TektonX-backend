@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 
 import databaseConfig from './config/database.config';
@@ -30,6 +31,8 @@ import { BootstrapModule } from './bootstrap/bootstrap.module';
 import { HealthModule } from './health/health.module';
 import { CohortsModule } from './cohorts/cohorts.module';
 import { PartnershipsModule } from './partnerships/partnerships.module';
+import { CurriculumModule } from './curriculum/curriculum.module';
+import { WeeklyDigestModule } from './weekly-digest/weekly-digest.module';
 
 @Module({
   imports: [
@@ -38,6 +41,7 @@ import { PartnershipsModule } from './partnerships/partnerships.module';
       load: [databaseConfig, jwtConfig, mailConfig, storageConfig],
       envFilePath: '.env',
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -72,6 +76,8 @@ import { PartnershipsModule } from './partnerships/partnerships.module';
     HealthModule,
     CohortsModule,
     PartnershipsModule,
+    CurriculumModule,
+    WeeklyDigestModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
