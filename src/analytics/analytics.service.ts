@@ -41,7 +41,8 @@ export class AnalyticsService {
     @InjectRepository(Task) private readonly taskRepo: Repository<Task>,
     @InjectRepository(MentorAssignment)
     private readonly assignmentRepo: Repository<MentorAssignment>,
-    @InjectRepository(Message) private readonly messageRepo: Repository<Message>,
+    @InjectRepository(Message)
+    private readonly messageRepo: Repository<Message>,
   ) {}
 
   async getCompletionRates(): Promise<TrackCompletion[]> {
@@ -59,20 +60,24 @@ export class AnalyticsService {
 
     const results: TrackCompletion[] = [];
     for (const { track } of tracks) {
-      const mentees = await this.userRepo.find({ where: { role: UserRole.MENTEE, track } });
+      const mentees = await this.userRepo.find({
+        where: { role: UserRole.MENTEE, track },
+      });
       if (!mentees.length) continue;
       const avg = (arr: number[], total: number) =>
-        total > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length / total) * 100 : 0;
+        total > 0
+          ? (arr.reduce((a, b) => a + b, 0) / arr.length / total) * 100
+          : 0;
       const m1 = avg(
-        mentees.map(m => m.milestone1Completed),
+        mentees.map((m) => m.milestone1Completed),
         m1Total,
       );
       const m2 = avg(
-        mentees.map(m => m.milestone2Completed),
+        mentees.map((m) => m.milestone2Completed),
         m2Total,
       );
       const m3 = avg(
-        mentees.map(m => m.milestone3Completed),
+        mentees.map((m) => m.milestone3Completed),
         m3Total,
       );
       results.push({
@@ -96,18 +101,24 @@ export class AnalyticsService {
         const completedCount = await this.taskRepo.count({
           where: { milestone, week, completed: true },
         });
-        data.push({ milestone, week, completedCount, templateCount: templatesForWeek });
+        data.push({
+          milestone,
+          week,
+          completedCount,
+          templateCount: templatesForWeek,
+        });
       }
     }
     return data;
   }
 
   async exportCsv(): Promise<string> {
-    const [completionRates, dropoutData, mentorEffectiveness] = await Promise.all([
-      this.getCompletionRates(),
-      this.getDropoutData(),
-      this.getMentorEffectiveness(),
-    ]);
+    const [completionRates, dropoutData, mentorEffectiveness] =
+      await Promise.all([
+        this.getCompletionRates(),
+        this.getDropoutData(),
+        this.getMentorEffectiveness(),
+      ]);
 
     const lines: string[] = [];
 
@@ -117,7 +128,9 @@ export class AnalyticsService {
 
     // Completion Rates
     lines.push('COMPLETION RATES BY TRACK');
-    lines.push('Track,Milestone 1 (%),Milestone 2 (%),Milestone 3 (%),Overall (%)');
+    lines.push(
+      'Track,Milestone 1 (%),Milestone 2 (%),Milestone 3 (%),Overall (%)',
+    );
     for (const r of completionRates) {
       lines.push(
         `"${r.track}",${r.milestone1.toFixed(1)},${r.milestone2.toFixed(1)},${r.milestone3.toFixed(1)},${r.overall.toFixed(1)}`,
@@ -129,7 +142,9 @@ export class AnalyticsService {
     lines.push('DROPOUT ANALYSIS');
     lines.push('Milestone,Week,Completed Tasks,Template Tasks');
     for (const d of dropoutData) {
-      lines.push(`${d.milestone},${d.week},${d.completedCount},${d.templateCount}`);
+      lines.push(
+        `${d.milestone},${d.week},${d.completedCount},${d.templateCount}`,
+      );
     }
     lines.push('');
 
@@ -146,11 +161,12 @@ export class AnalyticsService {
   }
 
   async exportPdf(): Promise<Buffer> {
-    const [completionRates, dropoutData, mentorEffectiveness] = await Promise.all([
-      this.getCompletionRates(),
-      this.getDropoutData(),
-      this.getMentorEffectiveness(),
-    ]);
+    const [completionRates, dropoutData, mentorEffectiveness] =
+      await Promise.all([
+        this.getCompletionRates(),
+        this.getDropoutData(),
+        this.getMentorEffectiveness(),
+      ]);
 
     return new Promise<Buffer>((resolve, reject) => {
       const doc = new PDFDocument({ margin: 50, size: 'A4' });
@@ -177,11 +193,19 @@ export class AnalyticsService {
       doc.moveDown(1.5);
 
       // ── Section 1: Completion Rates ──
-      doc.fontSize(14).fillColor(primaryColor).font('Helvetica-Bold').text('COMPLETION RATES BY TRACK');
+      doc
+        .fontSize(14)
+        .fillColor(primaryColor)
+        .font('Helvetica-Bold')
+        .text('COMPLETION RATES BY TRACK');
       doc.moveDown(0.4);
 
       if (completionRates.length === 0) {
-        doc.fontSize(10).fillColor(mutedColor).font('Helvetica').text('No data available.');
+        doc
+          .fontSize(10)
+          .fillColor(mutedColor)
+          .font('Helvetica')
+          .text('No data available.');
       } else {
         const colWidths = [180, 70, 70, 70, 70];
         const headers = ['Track', 'M1 (%)', 'M2 (%)', 'M3 (%)', 'Overall (%)'];
@@ -190,14 +214,19 @@ export class AnalyticsService {
         doc.rect(50, doc.y, pageWidth, 16).fill('#374151');
         const headerY = doc.y - 16 + 4;
         headers.forEach((h, i) => {
-          doc.fillColor('#FFFFFF').text(h, x + 3, headerY, { width: colWidths[i], align: i === 0 ? 'left' : 'center' });
+          doc.fillColor('#FFFFFF').text(h, x + 3, headerY, {
+            width: colWidths[i],
+            align: i === 0 ? 'left' : 'center',
+          });
           x += colWidths[i];
         });
         doc.y = headerY + 16;
 
         completionRates.forEach((r, idx) => {
           const rowY = doc.y;
-          doc.rect(50, rowY, pageWidth, 14).fill(idx % 2 === 0 ? '#F9FAFB' : '#F3F4F6');
+          doc
+            .rect(50, rowY, pageWidth, 14)
+            .fill(idx % 2 === 0 ? '#F9FAFB' : '#F3F4F6');
           x = 50;
           const vals = [
             r.track,
@@ -207,10 +236,14 @@ export class AnalyticsService {
             r.overall.toFixed(1),
           ];
           vals.forEach((v, i) => {
-            doc.fontSize(9).fillColor('#111827').font('Helvetica').text(v, x + 3, rowY + 3, {
-              width: colWidths[i] - 6,
-              align: i === 0 ? 'left' : 'center',
-            });
+            doc
+              .fontSize(9)
+              .fillColor('#111827')
+              .font('Helvetica')
+              .text(v, x + 3, rowY + 3, {
+                width: colWidths[i] - 6,
+                align: i === 0 ? 'left' : 'center',
+              });
             x += colWidths[i];
           });
           doc.y = rowY + 14;
@@ -219,29 +252,60 @@ export class AnalyticsService {
       doc.moveDown(1.5);
 
       // ── Section 2: Dropout Analysis ──
-      doc.fontSize(14).fillColor(primaryColor).font('Helvetica-Bold').text('DROPOUT ANALYSIS');
+      doc
+        .fontSize(14)
+        .fillColor(primaryColor)
+        .font('Helvetica-Bold')
+        .text('DROPOUT ANALYSIS');
       doc.moveDown(0.4);
 
       if (dropoutData.length === 0) {
-        doc.fontSize(10).fillColor(mutedColor).font('Helvetica').text('No data available.');
+        doc
+          .fontSize(10)
+          .fillColor(mutedColor)
+          .font('Helvetica')
+          .text('No data available.');
       } else {
         const colWidths = [80, 60, 120, 120];
-        const headers = ['Milestone', 'Week', 'Completed Tasks', 'Template Tasks'];
+        const headers = [
+          'Milestone',
+          'Week',
+          'Completed Tasks',
+          'Template Tasks',
+        ];
         let x = 50;
         doc.rect(50, doc.y, pageWidth, 16).fill('#374151');
         const headerY = doc.y - 16 + 4;
         headers.forEach((h, i) => {
-          doc.fontSize(9).fillColor('#FFFFFF').font('Helvetica-Bold').text(h, x + 3, headerY, { width: colWidths[i], align: 'center' });
+          doc
+            .fontSize(9)
+            .fillColor('#FFFFFF')
+            .font('Helvetica-Bold')
+            .text(h, x + 3, headerY, { width: colWidths[i], align: 'center' });
           x += colWidths[i];
         });
         doc.y = headerY + 16;
 
         dropoutData.forEach((d, idx) => {
           const rowY = doc.y;
-          doc.rect(50, rowY, pageWidth, 14).fill(idx % 2 === 0 ? '#F9FAFB' : '#F3F4F6');
+          doc
+            .rect(50, rowY, pageWidth, 14)
+            .fill(idx % 2 === 0 ? '#F9FAFB' : '#F3F4F6');
           x = 50;
-          [`M${d.milestone}`, String(d.week), String(d.completedCount), String(d.templateCount)].forEach((v, i) => {
-            doc.fontSize(9).fillColor('#111827').font('Helvetica').text(v, x + 3, rowY + 3, { width: colWidths[i] - 6, align: 'center' });
+          [
+            `M${d.milestone}`,
+            String(d.week),
+            String(d.completedCount),
+            String(d.templateCount),
+          ].forEach((v, i) => {
+            doc
+              .fontSize(9)
+              .fillColor('#111827')
+              .font('Helvetica')
+              .text(v, x + 3, rowY + 3, {
+                width: colWidths[i] - 6,
+                align: 'center',
+              });
             x += colWidths[i];
           });
           doc.y = rowY + 14;
@@ -250,29 +314,65 @@ export class AnalyticsService {
       doc.moveDown(1.5);
 
       // ── Section 3: Mentor Effectiveness ──
-      doc.fontSize(14).fillColor(primaryColor).font('Helvetica-Bold').text('MENTOR EFFECTIVENESS');
+      doc
+        .fontSize(14)
+        .fillColor(primaryColor)
+        .font('Helvetica-Bold')
+        .text('MENTOR EFFECTIVENESS');
       doc.moveDown(0.4);
 
       if (mentorEffectiveness.length === 0) {
-        doc.fontSize(10).fillColor(mutedColor).font('Helvetica').text('No data available.');
+        doc
+          .fontSize(10)
+          .fillColor(mutedColor)
+          .font('Helvetica')
+          .text('No data available.');
       } else {
         const colWidths = [130, 100, 60, 90, 90];
-        const headers = ['Mentor', 'Track', 'Mentees', 'Avg Progress', 'Messages'];
+        const headers = [
+          'Mentor',
+          'Track',
+          'Mentees',
+          'Avg Progress',
+          'Messages',
+        ];
         let x = 50;
         doc.rect(50, doc.y, pageWidth, 16).fill('#374151');
         const headerY = doc.y - 16 + 4;
         headers.forEach((h, i) => {
-          doc.fontSize(9).fillColor('#FFFFFF').font('Helvetica-Bold').text(h, x + 3, headerY, { width: colWidths[i], align: i === 0 ? 'left' : 'center' });
+          doc
+            .fontSize(9)
+            .fillColor('#FFFFFF')
+            .font('Helvetica-Bold')
+            .text(h, x + 3, headerY, {
+              width: colWidths[i],
+              align: i === 0 ? 'left' : 'center',
+            });
           x += colWidths[i];
         });
         doc.y = headerY + 16;
 
         mentorEffectiveness.forEach((m, idx) => {
           const rowY = doc.y;
-          doc.rect(50, rowY, pageWidth, 14).fill(idx % 2 === 0 ? '#F9FAFB' : '#F3F4F6');
+          doc
+            .rect(50, rowY, pageWidth, 14)
+            .fill(idx % 2 === 0 ? '#F9FAFB' : '#F3F4F6');
           x = 50;
-          [m.mentorName, m.track, String(m.menteeCount), `${m.avgMenteeProgress.toFixed(1)}%`, String(m.messagesCount)].forEach((v, i) => {
-            doc.fontSize(9).fillColor('#111827').font('Helvetica').text(v, x + 3, rowY + 3, { width: colWidths[i] - 6, align: i === 0 ? 'left' : 'center' });
+          [
+            m.mentorName,
+            m.track,
+            String(m.menteeCount),
+            `${m.avgMenteeProgress.toFixed(1)}%`,
+            String(m.messagesCount),
+          ].forEach((v, i) => {
+            doc
+              .fontSize(9)
+              .fillColor('#111827')
+              .font('Helvetica')
+              .text(v, x + 3, rowY + 3, {
+                width: colWidths[i] - 6,
+                align: i === 0 ? 'left' : 'center',
+              });
             x += colWidths[i];
           });
           doc.y = rowY + 14;
@@ -293,17 +393,22 @@ export class AnalyticsService {
         where: { mentorId: mentor.id },
         relations: ['mentee'],
       });
-      const mentees = assignments.map(a => a.mentee).filter(Boolean);
+      const mentees = assignments.map((a) => a.mentee).filter(Boolean);
       const avgProgress =
         mentees.length > 0
           ? mentees.reduce(
               (sum, m) =>
                 sum +
-                (m.milestone1Completed + m.milestone2Completed + m.milestone3Completed) / 3,
+                (m.milestone1Completed +
+                  m.milestone2Completed +
+                  m.milestone3Completed) /
+                  3,
               0,
             ) / mentees.length
           : 0;
-      const msgCount = await this.messageRepo.count({ where: { senderId: mentor.id } });
+      const msgCount = await this.messageRepo.count({
+        where: { senderId: mentor.id },
+      });
       results.push({
         mentorId: mentor.id,
         mentorName: mentor.name,

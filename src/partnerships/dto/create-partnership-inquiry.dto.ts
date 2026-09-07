@@ -1,21 +1,31 @@
-import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator'
+import {
+  IsEmail,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreatePartnershipInquiryDto {
-  @IsString() @IsNotEmpty()
-  companyName: string
+  @IsString()
+  @IsNotEmpty()
+  companyName: string;
 
-  @IsString() @IsNotEmpty()
-  contactName: string
+  @IsString()
+  @IsNotEmpty()
+  contactName: string;
 
   @IsEmail()
-  email: string
+  email: string;
 
-  @IsOptional() @IsString()
-  phone?: string
+  @IsOptional()
+  @IsString()
+  phone?: string;
 
   @IsIn(['sponsor', 'hiring', 'both'])
-  partnershipType: string
+  partnershipType: string;
 
-  @IsOptional() @IsString()
-  message?: string
+  @IsOptional()
+  @IsString()
+  message?: string;
 }

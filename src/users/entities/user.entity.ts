@@ -1,6 +1,10 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, CreateDateColumn,
-  UpdateDateColumn, Index,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '../../common/enums/user-role.enum';
@@ -76,7 +80,8 @@ export class User {
   @Column({
     name: 'email_notifications',
     type: 'jsonb',
-    default: () => `'{"announcements":true,"sessionReminders":true,"weeklyProgress":false,"milestoneCompletions":true}'`,
+    default: () =>
+      `'{"announcements":true,"sessionReminders":true,"weeklyProgress":false,"milestoneCompletions":true}'`,
   })
   emailNotifications: {
     announcements: boolean;

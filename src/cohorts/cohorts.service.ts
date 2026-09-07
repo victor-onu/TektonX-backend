@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cohort } from './entities/cohort.entity';
@@ -14,8 +18,11 @@ export class CohortsService {
   ) {}
 
   async create(dto: CreateCohortDto): Promise<Cohort> {
-    const existing = await this.cohortRepo.findOne({ where: { number: dto.number } });
-    if (existing) throw new ConflictException(`Cohort ${dto.number} already exists`);
+    const existing = await this.cohortRepo.findOne({
+      where: { number: dto.number },
+    });
+    if (existing)
+      throw new ConflictException(`Cohort ${dto.number} already exists`);
     const cohort = this.cohortRepo.create(dto);
     return this.cohortRepo.save(cohort);
   }

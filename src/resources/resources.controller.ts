@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ResourcesService } from './resources.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -21,7 +30,10 @@ export class ResourcesController {
   }
 
   @Get()
-  getResources(@Query('taskId') taskId?: string, @Query('track') track?: string) {
+  getResources(
+    @Query('taskId') taskId?: string,
+    @Query('track') track?: string,
+  ) {
     if (taskId) return this.resourcesService.getByTaskId(taskId);
     if (track) return this.resourcesService.getByTrack(track);
     return this.resourcesService.getAll();
@@ -36,7 +48,11 @@ export class ResourcesController {
 
   @Roles(UserRole.ADMIN, UserRole.MENTOR)
   @Put(':id')
-  update(@Param('id') id: string, @CurrentUser() user: User, @Body() dto: UpdateResourceDto) {
+  update(
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+    @Body() dto: UpdateResourceDto,
+  ) {
     return this.resourcesService.update(id, dto, user);
   }
 

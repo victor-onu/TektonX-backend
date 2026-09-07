@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { PartnershipInquiry } from './entities/partnership-inquiry.entity'
-import { CreatePartnershipInquiryDto } from './dto/create-partnership-inquiry.dto'
-import { MailService } from '../mail/mail.service'
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PartnershipInquiry } from './entities/partnership-inquiry.entity';
+import { CreatePartnershipInquiryDto } from './dto/create-partnership-inquiry.dto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class PartnershipsService {
@@ -21,14 +21,27 @@ export class PartnershipsService {
       phone: dto.phone ?? null,
       partnershipType: dto.partnershipType,
       message: dto.message ?? null,
-    })
-    await this.repo.save(inquiry)
-    this.mailService.sendPartnershipConfirmation(dto.email, dto.contactName, dto.companyName).catch(() => {})
-    this.mailService.sendPartnershipAdminNotification(dto.companyName, dto.contactName, dto.email, dto.partnershipType, dto.message).catch(() => {})
-    return { message: 'Thank you for your interest! We will be in touch within 3–5 business days.' }
+    });
+    await this.repo.save(inquiry);
+    this.mailService
+      .sendPartnershipConfirmation(dto.email, dto.contactName, dto.companyName)
+      .catch(() => {});
+    this.mailService
+      .sendPartnershipAdminNotification(
+        dto.companyName,
+        dto.contactName,
+        dto.email,
+        dto.partnershipType,
+        dto.message,
+      )
+      .catch(() => {});
+    return {
+      message:
+        'Thank you for your interest! We will be in touch within 3–5 business days.',
+    };
   }
 
   async findAll(): Promise<PartnershipInquiry[]> {
-    return this.repo.find({ order: { createdAt: 'DESC' } })
+    return this.repo.find({ order: { createdAt: 'DESC' } });
   }
 }

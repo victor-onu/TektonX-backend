@@ -18,7 +18,8 @@ export class CertificatesService {
   private readonly logger = new Logger(CertificatesService.name);
 
   constructor(
-    @InjectRepository(Certificate) private readonly certRepo: Repository<Certificate>,
+    @InjectRepository(Certificate)
+    private readonly certRepo: Repository<Certificate>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @InjectRepository(Task) private readonly taskRepo: Repository<Task>,
     private readonly config: ConfigService,
@@ -50,14 +51,20 @@ export class CertificatesService {
     if (existing) return existing;
 
     const verificationCode = this.generateCode();
-    const frontendUrl = this.config.get<string>('FRONTEND_URL', 'http://localhost:5173');
+    const frontendUrl = this.config.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:5173',
+    );
 
     // Generate simple PDF using PDFKit
     let pdfUrl: string | null = null;
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const PDFDocument = require('pdfkit');
-      const uploadDir = this.config.get<string>('storage.uploadDir', './uploads');
+      const uploadDir = this.config.get<string>(
+        'storage.uploadDir',
+        './uploads',
+      );
       const certDir = path.join(uploadDir, 'certificates');
       if (!fs.existsSync(certDir)) fs.mkdirSync(certDir, { recursive: true });
       const filename = `${verificationCode}.pdf`;
@@ -73,9 +80,15 @@ export class CertificatesService {
           .font('Helvetica-Bold')
           .text('CERTIFICATE OF COMPLETION', { align: 'center' });
         doc.moveDown();
-        doc.fontSize(18).font('Helvetica').text('This is to certify that', { align: 'center' });
+        doc
+          .fontSize(18)
+          .font('Helvetica')
+          .text('This is to certify that', { align: 'center' });
         doc.moveDown(0.5);
-        doc.fontSize(28).font('Helvetica-Bold').text(user.name, { align: 'center' });
+        doc
+          .fontSize(28)
+          .font('Helvetica-Bold')
+          .text(user.name, { align: 'center' });
         doc.moveDown(0.5);
         doc
           .fontSize(16)
@@ -86,7 +99,9 @@ export class CertificatesService {
           );
         doc.moveDown();
         doc.fontSize(14).text(`Track: ${user.track}`, { align: 'center' });
-        doc.text(`Completed on: ${new Date().toLocaleDateString()}`, { align: 'center' });
+        doc.text(`Completed on: ${new Date().toLocaleDateString()}`, {
+          align: 'center',
+        });
         doc.moveDown();
         doc
           .fontSize(12)
@@ -115,7 +130,9 @@ export class CertificatesService {
       pdfUrl: pdfUrl ?? undefined,
     });
     const saved = await this.certRepo.save(cert);
-    this.logger.log(`Certificate generated for user ${userId}: ${verificationCode}`);
+    this.logger.log(
+      `Certificate generated for user ${userId}: ${verificationCode}`,
+    );
     return saved;
   }
 
@@ -124,7 +141,9 @@ export class CertificatesService {
   }
 
   async verifyCertificate(code: string) {
-    const cert = await this.certRepo.findOne({ where: { verificationCode: code } });
+    const cert = await this.certRepo.findOne({
+      where: { verificationCode: code },
+    });
     if (!cert) throw new NotFoundException('Certificate not found');
 
     const user = await this.userRepo.findOne({ where: { id: cert.userId } });

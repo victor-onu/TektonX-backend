@@ -56,13 +56,20 @@ export class UsersService {
     await this.userRepo.update(id, fields);
   }
 
-  async updateNotificationPreferences(userId: string, prefs: object): Promise<User> {
+  async updateNotificationPreferences(
+    userId: string,
+    prefs: object,
+  ): Promise<User> {
     const user = await this.findById(userId);
     user.emailNotifications = { ...user.emailNotifications, ...prefs } as any;
     return this.userRepo.save(user);
   }
 
-  async updateMilestoneCount(userId: string, milestone: number, count: number): Promise<User> {
+  async updateMilestoneCount(
+    userId: string,
+    milestone: number,
+    count: number,
+  ): Promise<User> {
     const user = await this.findById(userId);
     if (milestone === 1) user.milestone1Completed = count;
     else if (milestone === 2) user.milestone2Completed = count;
@@ -71,13 +78,21 @@ export class UsersService {
   }
 
   async getApprovedMentors(track?: string): Promise<Partial<User>[]> {
-    const qb = this.userRepo.createQueryBuilder('user')
+    const qb = this.userRepo
+      .createQueryBuilder('user')
       .where('user.role = :role', { role: UserRole.MENTOR })
       .andWhere('user.status = :status', { status: UserStatus.ACTIVE })
-      .andWhere('user.applicationStatus = :appStatus', { appStatus: ApplicationStatus.APPROVED })
+      .andWhere('user.applicationStatus = :appStatus', {
+        appStatus: ApplicationStatus.APPROVED,
+      })
       .select([
-        'user.id', 'user.name', 'user.track', 'user.bio',
-        'user.title', 'user.profilePhotoUrl', 'user.linkedinUrl',
+        'user.id',
+        'user.name',
+        'user.track',
+        'user.bio',
+        'user.title',
+        'user.profilePhotoUrl',
+        'user.linkedinUrl',
       ]);
     if (track) qb.andWhere('user.track = :track', { track });
     return qb.getMany();

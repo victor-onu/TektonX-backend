@@ -1,4 +1,10 @@
-import { IsString, IsUUID, IsOptional, IsUrl, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsUUID,
+  IsOptional,
+  IsUrl,
+  IsNotEmpty,
+} from 'class-validator';
 
 export class SendMessageDto {
   @IsUUID() receiverId: string;

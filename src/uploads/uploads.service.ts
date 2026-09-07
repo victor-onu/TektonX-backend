@@ -11,12 +11,17 @@ import { Upload } from './entities/upload.entity';
 
 // ── File size limits ──────────────────────────────────────────────────────────
 export const FILE_SIZE_LIMITS = {
-  image: 5 * 1024 * 1024,    // 5 MB — profile photos
-  flier: 2 * 1024 * 1024,    // 2 MB — event fliers
+  image: 5 * 1024 * 1024, // 5 MB — profile photos
+  flier: 2 * 1024 * 1024, // 2 MB — event fliers
   document: 10 * 1024 * 1024, // 10 MB — task attachments
 } as const;
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+];
 const ALLOWED_DOC_TYPES = [
   'application/pdf',
   'application/msword',
@@ -37,10 +42,13 @@ function uploadToCloudinary(
 ): Promise<UploadApiResponse> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
-      .upload_stream({ folder: `tektonx/${folder}`, resource_type: resourceType }, (err, result) => {
-        if (err || !result) return reject(err ?? new Error('Upload failed'));
-        resolve(result);
-      })
+      .upload_stream(
+        { folder: `tektonx/${folder}`, resource_type: resourceType },
+        (err, result) => {
+          if (err || !result) return reject(err ?? new Error('Upload failed'));
+          resolve(result);
+        },
+      )
       .end(buffer);
   });
 }
@@ -68,7 +76,9 @@ export class UploadsService {
     const limit = isImage ? FILE_SIZE_LIMITS.image : FILE_SIZE_LIMITS.document;
     if (file.size > limit) {
       const mb = limit / 1024 / 1024;
-      throw new BadRequestException(`File too large. Maximum size is ${mb}MB for this file type.`);
+      throw new BadRequestException(
+        `File too large. Maximum size is ${mb}MB for this file type.`,
+      );
     }
 
     const folder = isImage ? 'uploads' : 'documents';
@@ -88,7 +98,9 @@ export class UploadsService {
 
   async uploadFlier(file: Express.Multer.File): Promise<string> {
     if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
-      throw new BadRequestException('Flier must be an image (JPEG, PNG, WEBP, or GIF).');
+      throw new BadRequestException(
+        'Flier must be an image (JPEG, PNG, WEBP, or GIF).',
+      );
     }
     if (file.size > FILE_SIZE_LIMITS.flier) {
       throw new BadRequestException('Flier image must be 2MB or less.');
@@ -99,7 +111,9 @@ export class UploadsService {
 
   async uploadProfilePhoto(file: Express.Multer.File): Promise<string> {
     if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
-      throw new BadRequestException('Profile photo must be an image (JPEG, PNG, WEBP, or GIF).');
+      throw new BadRequestException(
+        'Profile photo must be an image (JPEG, PNG, WEBP, or GIF).',
+      );
     }
     if (file.size > FILE_SIZE_LIMITS.image) {
       throw new BadRequestException('Profile photo must be 5MB or less.');
@@ -128,7 +142,8 @@ export class UploadsService {
     isAdmin: boolean,
   ): Promise<{ message: string }> {
     const upload = await this.getById(id);
-    if (!isAdmin && upload.userId !== userId) throw new ForbiddenException('Access denied');
+    if (!isAdmin && upload.userId !== userId)
+      throw new ForbiddenException('Access denied');
 
     // Delete from Cloudinary
     try {

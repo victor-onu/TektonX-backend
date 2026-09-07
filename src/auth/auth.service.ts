@@ -66,10 +66,9 @@ export class AuthService {
     }
 
     return {
-      message:
-        isMentor
-          ? 'Application submitted for review'
-          : 'Registration successful',
+      message: isMentor
+        ? 'Application submitted for review'
+        : 'Registration successful',
     };
   }
 
@@ -81,7 +80,9 @@ export class AuthService {
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
     if (user.status === UserStatus.SUSPENDED) {
-      throw new UnauthorizedException('Your account has been suspended. Please contact support.');
+      throw new UnauthorizedException(
+        'Your account has been suspended. Please contact support.',
+      );
     }
 
     const accessToken = this.generateAccessToken(user);
@@ -95,7 +96,8 @@ export class AuthService {
       const payload = this.jwtService.verify(dto.refreshToken, {
         secret: this.configService.get<string>('jwt.secret'),
       });
-      if (payload.type !== 'refresh') throw new UnauthorizedException('Invalid token type');
+      if (payload.type !== 'refresh')
+        throw new UnauthorizedException('Invalid token type');
 
       const user = await this.usersService.findById(payload.sub);
       const accessToken = this.generateAccessToken(user);
@@ -116,12 +118,16 @@ export class AuthService {
         },
       );
       const frontendUrl =
-        this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
+        this.configService.get<string>('FRONTEND_URL') ||
+        'http://localhost:5173';
       const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
-      await this.mailService.sendPasswordReset(user.email, user.name, resetLink).catch(() => {});
+      await this.mailService
+        .sendPasswordReset(user.email, user.name, resetLink)
+        .catch(() => {});
     }
     return {
-      message: 'If an account with that email exists, a reset link has been sent.',
+      message:
+        'If an account with that email exists, a reset link has been sent.',
     };
   }
 
@@ -130,7 +136,8 @@ export class AuthService {
       const payload = this.jwtService.verify(dto.token, {
         secret: this.configService.get<string>('jwt.secret'),
       });
-      if (payload.type !== 'password_reset') throw new BadRequestException('Invalid token');
+      if (payload.type !== 'password_reset')
+        throw new BadRequestException('Invalid token');
 
       const passwordHash = await bcrypt.hash(dto.newPassword, 12);
       await this.usersService.updatePassword(payload.sub, passwordHash);
@@ -141,9 +148,16 @@ export class AuthService {
     }
   }
 
-  async activateAccount(token: string, password: string): Promise<{ message: string }> {
+  async activateAccount(
+    token: string,
+    password: string,
+  ): Promise<{ message: string }> {
     const user = await this.usersService.findByInviteToken(token);
-    if (!user || !user.inviteTokenExpiry || user.inviteTokenExpiry < new Date()) {
+    if (
+      !user ||
+      !user.inviteTokenExpiry ||
+      user.inviteTokenExpiry < new Date()
+    ) {
       throw new BadRequestException('Invalid or expired activation link.');
     }
     const passwordHash = await bcrypt.hash(password, 12);
@@ -160,7 +174,8 @@ export class AuthService {
       { sub: user.id, email: user.email, role: user.role, status: user.status },
       {
         secret: this.configService.get<string>('jwt.secret') as string,
-        expiresIn: (this.configService.get<string>('jwt.accessExpiration') || '15m') as any,
+        expiresIn: (this.configService.get<string>('jwt.accessExpiration') ||
+          '15m') as any,
       },
     );
   }
@@ -170,7 +185,8 @@ export class AuthService {
       { sub: user.id, type: 'refresh' },
       {
         secret: this.configService.get<string>('jwt.secret') as string,
-        expiresIn: (this.configService.get<string>('jwt.refreshExpiration') || '7d') as any,
+        expiresIn: (this.configService.get<string>('jwt.refreshExpiration') ||
+          '7d') as any,
       },
     );
   }

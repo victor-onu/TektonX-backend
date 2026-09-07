@@ -23,7 +23,10 @@ export class UsersController {
   }
 
   @Put('users/me/notification-preferences')
-  updateNotificationPreferences(@CurrentUser() user: User, @Body() body: Record<string, boolean>) {
+  updateNotificationPreferences(
+    @CurrentUser() user: User,
+    @Body() body: Record<string, boolean>,
+  ) {
     return this.usersService.updateNotificationPreferences(user.id, body);
   }
 

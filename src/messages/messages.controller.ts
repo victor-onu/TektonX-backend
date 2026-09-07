@@ -17,7 +17,10 @@ export class MessagesController {
   }
 
   @Get(':partnerId')
-  async getMessages(@Param('partnerId') partnerId: string, @CurrentUser() user: User) {
+  async getMessages(
+    @Param('partnerId') partnerId: string,
+    @CurrentUser() user: User,
+  ) {
     await this.messagesService.markConversationAsRead(user.id, partnerId);
     return this.messagesService.getMessages(user.id, partnerId);
   }

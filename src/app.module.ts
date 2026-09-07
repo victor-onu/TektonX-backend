@@ -31,6 +31,7 @@ import { BootstrapModule } from './bootstrap/bootstrap.module';
 import { HealthModule } from './health/health.module';
 import { CohortsModule } from './cohorts/cohorts.module';
 import { PartnershipsModule } from './partnerships/partnerships.module';
+import { CommunityMembersModule } from './community-members/community-members.module';
 import { CurriculumModule } from './curriculum/curriculum.module';
 import { WeeklyDigestModule } from './weekly-digest/weekly-digest.module';
 
@@ -55,7 +56,10 @@ import { WeeklyDigestModule } from './weekly-digest/weekly-digest.module';
         autoLoadEntities: true,
         synchronize: config.get<string>('NODE_ENV') !== 'production',
         logging: ['error'],
-        ssl: config.get<string>('DATABASE_SSL') === 'true' ? { rejectUnauthorized: false } : false,
+        ssl:
+          config.get<string>('DATABASE_SSL') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
       }),
     }),
     AuthModule,
@@ -76,6 +80,7 @@ import { WeeklyDigestModule } from './weekly-digest/weekly-digest.module';
     HealthModule,
     CohortsModule,
     PartnershipsModule,
+    CommunityMembersModule,
     CurriculumModule,
     WeeklyDigestModule,
   ],
