@@ -1,4 +1,9 @@
-import { Injectable, ForbiddenException, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Message } from './entities/message.entity';
@@ -69,7 +74,9 @@ export class MessagesService {
       ],
     });
     if (!assignment) {
-      throw new ForbiddenException('You can only message your assigned mentor or mentees.');
+      throw new ForbiddenException(
+        'You can only message your assigned mentor or mentees.',
+      );
     }
 
     const message = this.messageRepo.create({
@@ -91,19 +98,28 @@ export class MessagesService {
   }
 
   async markAsRead(messageId: string, userId: string): Promise<Message> {
-    const message = await this.messageRepo.findOne({ where: { id: messageId } });
+    const message = await this.messageRepo.findOne({
+      where: { id: messageId },
+    });
     if (!message) throw new NotFoundException('Message not found');
-    if (message.receiverId !== userId) throw new ForbiddenException('Cannot mark this message as read');
+    if (message.receiverId !== userId)
+      throw new ForbiddenException('Cannot mark this message as read');
     message.read = true;
     return this.messageRepo.save(message);
   }
 
-  async markConversationAsRead(userId: string, partnerId: string): Promise<{ count: number }> {
+  async markConversationAsRead(
+    userId: string,
+    partnerId: string,
+  ): Promise<{ count: number }> {
     const result = await this.messageRepo
       .createQueryBuilder()
       .update(Message)
       .set({ read: true })
-      .where('senderId = :partnerId AND receiverId = :userId AND read = false', { partnerId, userId })
+      .where(
+        'senderId = :partnerId AND receiverId = :userId AND read = false',
+        { partnerId, userId },
+      )
       .execute();
     return { count: result.affected ?? 0 };
   }

@@ -28,8 +28,15 @@ export class UploadsController {
   @Public()
   @Post('profile-photo')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: FILE_SIZE_LIMITS.image } }))
-  async uploadProfilePhoto(@UploadedFile() file: Express.Multer.File): Promise<{ url: string }> {
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: FILE_SIZE_LIMITS.image },
+    }),
+  )
+  async uploadProfilePhoto(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ url: string }> {
     if (!file) throw new BadRequestException('No file provided.');
     const url = await this.uploadsService.uploadProfilePhoto(file);
     return { url };
@@ -37,7 +44,12 @@ export class UploadsController {
 
   @Post()
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: FILE_SIZE_LIMITS.document } }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: FILE_SIZE_LIMITS.document },
+    }),
+  )
   upload(
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: User,
@@ -47,7 +59,10 @@ export class UploadsController {
   }
 
   @Get()
-  getUploads(@Query('taskId') taskId?: string, @CurrentUser() user: User = {} as User) {
+  getUploads(
+    @Query('taskId') taskId?: string,
+    @CurrentUser() user: User = {} as User,
+  ) {
     if (taskId) return this.uploadsService.getByTaskId(taskId);
     return this.uploadsService.getByUserId(user.id);
   }

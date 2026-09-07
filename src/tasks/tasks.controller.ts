@@ -16,7 +16,9 @@ export class TasksController {
 
   @Get('templates')
   getTemplates(@Query('milestone') milestone?: string) {
-    return this.tasksService.getTemplates(milestone ? parseInt(milestone) : undefined);
+    return this.tasksService.getTemplates(
+      milestone ? parseInt(milestone) : undefined,
+    );
   }
 
   @Roles(UserRole.MENTEE)
@@ -33,7 +35,11 @@ export class TasksController {
 
   @Roles(UserRole.MENTEE)
   @Put(':id')
-  updateTask(@Param('id') id: string, @CurrentUser() user: User, @Body() dto: UpdateTaskDto) {
+  updateTask(
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+    @Body() dto: UpdateTaskDto,
+  ) {
     return this.tasksService.updateTask(id, user.id, dto);
   }
 }

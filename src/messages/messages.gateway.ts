@@ -9,7 +9,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({ cors: { origin: '*' }, namespace: '/messages' })
-export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class MessagesGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -21,7 +23,8 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
   async handleConnection(client: Socket) {
     try {
       const token =
-        client.handshake.auth?.token || (client.handshake.query?.token as string);
+        client.handshake.auth?.token ||
+        (client.handshake.query?.token as string);
       if (!token) {
         client.disconnect();
         return;

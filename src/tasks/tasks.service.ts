@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
@@ -36,11 +40,19 @@ export class TasksService {
   }
 
   async createPersonalCopy(userId: string, dto: CreateTaskDto): Promise<Task> {
-    const task = this.taskRepo.create({ ...dto, userId, completed: dto.completed ?? false });
+    const task = this.taskRepo.create({
+      ...dto,
+      userId,
+      completed: dto.completed ?? false,
+    });
     return this.taskRepo.save(task);
   }
 
-  async updateTask(taskId: string, userId: string, dto: UpdateTaskDto): Promise<Task> {
+  async updateTask(
+    taskId: string,
+    userId: string,
+    dto: UpdateTaskDto,
+  ): Promise<Task> {
     const task = await this.taskRepo.findOne({ where: { id: taskId } });
     if (!task) throw new NotFoundException('Task not found');
     if (task.userId !== userId) throw new ForbiddenException('Access denied');
@@ -56,7 +68,9 @@ export class TasksService {
     // Fire program-completion email when milestone 3 is fully done
     if (task.milestone === 3 && count === TASKS_PER_MILESTONE) {
       const user = await this.usersService.findById(userId);
-      this.mailService.sendMilestoneCompleted(user.email, user.name, user.track).catch(() => {});
+      this.mailService
+        .sendMilestoneCompleted(user.email, user.name, user.track)
+        .catch(() => {});
     }
 
     return task;
@@ -65,7 +79,10 @@ export class TasksService {
   async getTasksByUserId(userId: string, milestone?: number): Promise<Task[]> {
     const where: any = { userId };
     if (milestone) where.milestone = milestone;
-    return this.taskRepo.find({ where, order: { milestone: 'ASC', week: 'ASC' } });
+    return this.taskRepo.find({
+      where,
+      order: { milestone: 'ASC', week: 'ASC' },
+    });
   }
 
   async createTemplateTask(dto: CreateTaskDto): Promise<Task> {
@@ -73,8 +90,13 @@ export class TasksService {
     return this.taskRepo.save(task);
   }
 
-  async updateTemplateTask(id: string, dto: Partial<CreateTaskDto>): Promise<Task> {
-    const task = await this.taskRepo.findOne({ where: { id, userId: null as any } });
+  async updateTemplateTask(
+    id: string,
+    dto: Partial<CreateTaskDto>,
+  ): Promise<Task> {
+    const task = await this.taskRepo.findOne({
+      where: { id, userId: null as any },
+    });
     if (!task) throw new NotFoundException('Template task not found');
     Object.assign(task, dto);
     return this.taskRepo.save(task);

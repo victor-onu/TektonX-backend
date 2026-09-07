@@ -1,4 +1,10 @@
-import { IsString, IsInt, IsDateString, IsNotEmpty, Min } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsDateString,
+  IsNotEmpty,
+  Min,
+} from 'class-validator';
 
 export class CreateCohortDto {
   @IsString() @IsNotEmpty() name: string;

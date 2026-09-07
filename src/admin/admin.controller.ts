@@ -30,9 +30,11 @@ import { AssignMenteesDto } from './dto/assign-mentees.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
 import { BroadcastDto } from './dto/broadcast.dto';
 
-async function parseXlsx(buffer: Buffer): Promise<{ name: string; email: string; track: string }[]> {
+async function parseXlsx(
+  buffer: Buffer,
+): Promise<{ name: string; email: string; track: string }[]> {
   const workbook = new ExcelJS.Workbook();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   await workbook.xlsx.load(buffer as any);
   const sheet = workbook.worksheets[0];
   const dataRows: { name: string; email: string; track: string }[] = [];
@@ -93,7 +95,11 @@ export class AdminController {
     @Body() body: { status: ApplicationStatus },
     @CurrentUser() admin: User,
   ) {
-    return this.adminService.updateMenteeApplicationStatus(id, body.status, admin.id);
+    return this.adminService.updateMenteeApplicationStatus(
+      id,
+      body.status,
+      admin.id,
+    );
   }
 
   @Patch('mentees/:id/graduate')
@@ -102,7 +108,10 @@ export class AdminController {
   }
 
   @Post('cohorts/:cohortId/graduate-all')
-  graduateCohort(@Param('cohortId') cohortId: string, @CurrentUser() admin: User) {
+  graduateCohort(
+    @Param('cohortId') cohortId: string,
+    @CurrentUser() admin: User,
+  ) {
     return this.adminService.graduateCohort(cohortId, admin.id);
   }
 
@@ -168,27 +177,39 @@ export class AdminController {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Invites');
 
-    sheet.columns = [
-      { width: 25 },
-      { width: 35 },
-      { width: 45 },
-    ];
+    sheet.columns = [{ width: 25 }, { width: 35 }, { width: 45 }];
 
     // Header row
     const headerRow = sheet.addRow(['name', 'email', 'track']);
     headerRow.font = { bold: true };
 
     // Note row
-    const noteRow = sheet.addRow(['# Replace these rows with real data. Delete this row before uploading.', '', '']);
+    const noteRow = sheet.addRow([
+      '# Replace these rows with real data. Delete this row before uploading.',
+      '',
+      '',
+    ]);
     noteRow.font = { italic: true, color: { argb: 'FF888888' } };
 
     // Example data rows
-    sheet.addRow(['John Doe', 'john@example.com', 'Software Development (Frontend & Backend)']);
+    sheet.addRow([
+      'John Doe',
+      'john@example.com',
+      'Software Development (Frontend & Backend)',
+    ]);
     sheet.addRow(['Jane Doe', 'jane@example.com', 'UI/UX Design']);
     sheet.addRow(['Alex Smith', 'alex@example.com', 'Mobile App Development']);
-    sheet.addRow(['Sam Taylor', 'sam@example.com', 'Product/Project Management']);
+    sheet.addRow([
+      'Sam Taylor',
+      'sam@example.com',
+      'Product/Project Management',
+    ]);
     sheet.addRow(['Chris Lee', 'chris@example.com', 'Quality Assurance (QA)']);
-    sheet.addRow(['Morgan Brown', 'morgan@example.com', 'Data (Analysis/Science)']);
+    sheet.addRow([
+      'Morgan Brown',
+      'morgan@example.com',
+      'Data (Analysis/Science)',
+    ]);
     sheet.addRow(['Riley Green', 'riley@example.com', 'Cybersecurity']);
     sheet.addRow(['Jordan Blake', 'jordan@example.com', 'Web3']);
 
@@ -197,7 +218,9 @@ export class AdminController {
       sheet.getCell(`C${i}`).dataValidation = {
         type: 'list',
         allowBlank: false,
-        formulae: ['"Software Development (Frontend & Backend),UI/UX Design,Mobile App Development,Product/Project Management,Quality Assurance (QA),Data (Analysis/Science),Cybersecurity,Web3"'],
+        formulae: [
+          '"Software Development (Frontend & Backend),UI/UX Design,Mobile App Development,Product/Project Management,Quality Assurance (QA),Data (Analysis/Science),Cybersecurity,Web3"',
+        ],
         showErrorMessage: true,
         errorTitle: 'Invalid Track',
         error: 'Please select a valid track from the dropdown.',
@@ -205,8 +228,14 @@ export class AdminController {
     }
 
     const buffer = await workbook.xlsx.writeBuffer();
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename="tektonx-invite-template.xlsx"');
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename="tektonx-invite-template.xlsx"',
+    );
     res.send(Buffer.from(buffer));
   }
 
@@ -264,7 +293,11 @@ export class AdminController {
   }
 
   @Put('tasks/:id')
-  updateTemplateTask(@Param('id') id: string, @Body() dto: any, @CurrentUser() user: User) {
+  updateTemplateTask(
+    @Param('id') id: string,
+    @Body() dto: any,
+    @CurrentUser() user: User,
+  ) {
     return this.adminService.updateTemplateTask(id, dto, user.id);
   }
 
@@ -281,7 +314,12 @@ export class AdminController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
   ) {
-    return this.adminService.getSignups({ track, search, page: +page, limit: +limit });
+    return this.adminService.getSignups({
+      track,
+      search,
+      page: +page,
+      limit: +limit,
+    });
   }
 
   @Get('signups/export')
@@ -299,6 +337,10 @@ export class AdminController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
   ) {
-    return this.adminService.getAuditLog({ action, page: +page, limit: +limit });
+    return this.adminService.getAuditLog({
+      action,
+      page: +page,
+      limit: +limit,
+    });
   }
 }

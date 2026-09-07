@@ -66,7 +66,10 @@ export class NotificationsService {
     return { count };
   }
 
-  async markAsRead(notificationId: string, userId: string): Promise<Notification> {
+  async markAsRead(
+    notificationId: string,
+    userId: string,
+  ): Promise<Notification> {
     const n = await this.notificationRepo.findOne({
       where: { id: notificationId, userId },
     });

@@ -30,7 +30,10 @@ export class SessionsService {
     return s;
   }
 
-  async create(dto: CreateSessionDto, userId: string): Promise<MentorshipSession> {
+  async create(
+    dto: CreateSessionDto,
+    userId: string,
+  ): Promise<MentorshipSession> {
     const session = this.sessionRepo.create({ ...dto, createdBy: userId });
     return this.sessionRepo.save(session);
   }

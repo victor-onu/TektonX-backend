@@ -36,8 +36,14 @@ export class AnnouncementsService {
     return a;
   }
 
-  async create(dto: CreateAnnouncementDto, userId: string): Promise<Announcement> {
-    const announcement = this.announcementRepo.create({ ...dto, createdBy: userId });
+  async create(
+    dto: CreateAnnouncementDto,
+    userId: string,
+  ): Promise<Announcement> {
+    const announcement = this.announcementRepo.create({
+      ...dto,
+      createdBy: userId,
+    });
     const saved = await this.announcementRepo.save(announcement);
     this.logger.log(`New announcement created: ${saved.title}`);
     return saved;
@@ -52,7 +58,10 @@ export class AnnouncementsService {
         try {
           await cloudinary.uploader.destroy(publicId);
         } catch (err) {
-          this.logger.warn(`Failed to delete old flier from Cloudinary: ${publicId}`, err);
+          this.logger.warn(
+            `Failed to delete old flier from Cloudinary: ${publicId}`,
+            err,
+          );
         }
       }
     }
@@ -69,7 +78,10 @@ export class AnnouncementsService {
         try {
           await cloudinary.uploader.destroy(publicId);
         } catch (err) {
-          this.logger.warn(`Failed to delete flier from Cloudinary: ${publicId}`, err);
+          this.logger.warn(
+            `Failed to delete flier from Cloudinary: ${publicId}`,
+            err,
+          );
         }
       }
     }

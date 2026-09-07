@@ -22,8 +22,14 @@ export interface WeeklyContentBundle {
 export class CurriculumService {
   private readonly TOTAL_WEEKS = 12;
 
-  getCurrentWeekForCohort(cohortStartDate: Date | string, now: Date = new Date()): number | null {
-    const start = typeof cohortStartDate === 'string' ? new Date(cohortStartDate) : cohortStartDate;
+  getCurrentWeekForCohort(
+    cohortStartDate: Date | string,
+    now: Date = new Date(),
+  ): number | null {
+    const start =
+      typeof cohortStartDate === 'string'
+        ? new Date(cohortStartDate)
+        : cohortStartDate;
     const msPerDay = 1000 * 60 * 60 * 24;
     const days = Math.floor((now.getTime() - start.getTime()) / msPerDay);
     if (days < 0) return null;

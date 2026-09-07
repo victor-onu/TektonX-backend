@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resource } from './entities/resource.entity';
@@ -15,22 +20,35 @@ export class ResourcesService {
   ) {}
 
   async getByTaskId(taskId: string): Promise<Resource[]> {
-    return this.resourceRepo.find({ where: { taskId }, order: { createdAt: 'ASC' } });
+    return this.resourceRepo.find({
+      where: { taskId },
+      order: { createdAt: 'ASC' },
+    });
   }
 
   async getByTrack(track: string): Promise<Resource[]> {
-    return this.resourceRepo.find({ where: { track }, order: { createdAt: 'ASC' } });
+    return this.resourceRepo.find({
+      where: { track },
+      order: { createdAt: 'ASC' },
+    });
   }
 
   async getByCreator(userId: string): Promise<Resource[]> {
-    return this.resourceRepo.find({ where: { createdBy: userId }, order: { createdAt: 'ASC' } });
+    return this.resourceRepo.find({
+      where: { createdBy: userId },
+      order: { createdAt: 'ASC' },
+    });
   }
 
   async getAll(): Promise<Resource[]> {
     return this.resourceRepo.find({ order: { createdAt: 'ASC' } });
   }
 
-  async create(dto: CreateResourceDto, userId: string, userTrack?: string): Promise<Resource> {
+  async create(
+    dto: CreateResourceDto,
+    userId: string,
+    userTrack?: string,
+  ): Promise<Resource> {
     if (!dto.taskId && !dto.track && !userTrack) {
       throw new BadRequestException('Either taskId or track is required');
     }
@@ -42,7 +60,11 @@ export class ResourcesService {
     return this.resourceRepo.save(resource);
   }
 
-  async update(id: string, dto: UpdateResourceDto, user: User): Promise<Resource> {
+  async update(
+    id: string,
+    dto: UpdateResourceDto,
+    user: User,
+  ): Promise<Resource> {
     const resource = await this.resourceRepo.findOne({ where: { id } });
     if (!resource) throw new NotFoundException('Resource not found');
     if (user.role !== UserRole.ADMIN && resource.createdBy !== user.id) {

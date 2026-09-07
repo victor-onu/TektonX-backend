@@ -12,7 +12,10 @@ export class MailService {
   ) {}
 
   private get frontendUrl(): string {
-    const raw = this.config.get<string>('FRONTEND_URL', 'http://localhost:5173');
+    const raw = this.config.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:5173',
+    );
     // If multiple origins are configured (comma-separated), use the first one
     return raw.split(',')[0].trim();
   }
@@ -36,40 +39,70 @@ export class MailService {
       });
       this.logger.log(`[EMAIL SENT] To: ${to} | Subject: ${subject}`);
     } catch (err) {
-      this.logger.error(`[EMAIL FAILED] To: ${to} | Subject: ${subject} | ${err?.message}`);
+      this.logger.error(
+        `[EMAIL FAILED] To: ${to} | Subject: ${subject} | ${err?.message}`,
+      );
     }
   }
 
   async sendWelcomeMentee(to: string, name: string) {
     const loginUrl = `${this.frontendUrl}/auth/login`;
-    await this.send(to, 'Welcome to TektonX!', 'welcome-mentee', { name, loginUrl });
+    await this.send(to, 'Welcome to TektonX!', 'welcome-mentee', {
+      name,
+      loginUrl,
+    });
   }
 
   async sendMenteeApplicationReceived(to: string, name: string) {
-    await this.send(to, 'TektonX — Application Received', 'mentee-application-received', { name });
+    await this.send(
+      to,
+      'TektonX — Application Received',
+      'mentee-application-received',
+      { name },
+    );
   }
 
   async sendMentorApplicationReceived(to: string, name: string) {
     const dashboardUrl = `${this.frontendUrl}/dashboard/mentor`;
-    await this.send(to, 'TektonX — Application Received', 'welcome-mentor-pending', { name, dashboardUrl });
+    await this.send(
+      to,
+      'TektonX — Application Received',
+      'welcome-mentor-pending',
+      { name, dashboardUrl },
+    );
   }
 
   async sendMentorApproved(to: string, name: string) {
     const loginUrl = `${this.frontendUrl}/auth/login`;
-    await this.send(to, "You've Been Approved as a TektonX Mentor!", 'mentor-approved', { name, loginUrl });
+    await this.send(
+      to,
+      "You've Been Approved as a TektonX Mentor!",
+      'mentor-approved',
+      { name, loginUrl },
+    );
   }
 
   async sendMentorRejected(to: string, name: string, reason?: string) {
-    await this.send(to, 'TektonX — Mentor Application Update', 'mentor-rejected', {
-      name,
-      reason: reason || null,
-      contactEmail: 'tektonxlabs@gmail.com',
-    });
+    await this.send(
+      to,
+      'TektonX — Mentor Application Update',
+      'mentor-rejected',
+      {
+        name,
+        reason: reason || null,
+        contactEmail: 'tektonxlabs@gmail.com',
+      },
+    );
   }
 
   async sendMenteeApproved(to: string, name: string) {
     const loginUrl = `${this.frontendUrl}/auth/login`;
-    await this.send(to, 'Your TektonX Application Has Been Approved!', 'mentee-approved', { name, loginUrl });
+    await this.send(
+      to,
+      'Your TektonX Application Has Been Approved!',
+      'mentee-approved',
+      { name, loginUrl },
+    );
   }
 
   async sendMenteeAssigned(
@@ -93,31 +126,51 @@ export class MailService {
     mentees: { name: string; track: string }[],
   ) {
     const dashboardUrl = `${this.frontendUrl}/dashboard/mentor`;
-    await this.send(to, 'New Mentee Assignment — TektonX', 'mentor-new-mentees', {
-      mentorName,
-      mentees,
-      dashboardUrl,
-    });
+    await this.send(
+      to,
+      'New Mentee Assignment — TektonX',
+      'mentor-new-mentees',
+      {
+        mentorName,
+        mentees,
+        dashboardUrl,
+      },
+    );
   }
 
   async sendPasswordReset(to: string, name: string, resetUrl: string) {
-    await this.send(to, 'Reset Your Password — TektonX', 'password-reset', { name, resetUrl });
+    await this.send(to, 'Reset Your Password — TektonX', 'password-reset', {
+      name,
+      resetUrl,
+    });
   }
 
   async sendMilestoneCompleted(to: string, name: string, track: string) {
     const dashboardUrl = `${this.frontendUrl}/dashboard/mentee`;
-    await this.send(to, "Congratulations! You've Completed TektonX!", 'milestone-completed', {
-      name,
-      track,
-      dashboardUrl,
-    });
+    await this.send(
+      to,
+      "Congratulations! You've Completed TektonX!",
+      'milestone-completed',
+      {
+        name,
+        track,
+        dashboardUrl,
+      },
+    );
   }
 
   async sendInvite(to: string, name: string, activateUrl: string) {
-    await this.send(to, "You've Been Invited to TektonX", 'invite', { name, activateUrl });
+    await this.send(to, "You've Been Invited to TektonX", 'invite', {
+      name,
+      activateUrl,
+    });
   }
 
-  async sendPartnershipConfirmation(to: string, contactName: string, companyName: string) {
+  async sendPartnershipConfirmation(
+    to: string,
+    contactName: string,
+    companyName: string,
+  ) {
     await this.send(
       to,
       'Partnership Inquiry Received — TektonX',
@@ -126,24 +179,43 @@ export class MailService {
     );
   }
 
-  async sendBroadcast(to: string, name: string, subject: string, htmlBody: string) {
-    await this.send(to, subject, 'broadcast', { name, subject, body: htmlBody });
+  async sendBroadcast(
+    to: string,
+    name: string,
+    subject: string,
+    htmlBody: string,
+  ) {
+    await this.send(to, subject, 'broadcast', {
+      name,
+      subject,
+      body: htmlBody,
+    });
   }
 
   async sendWeeklyDigestMentee(to: string, context: Record<string, unknown>) {
     const week = context.week as number;
-    await this.send(to, `Week ${week} on TektonX — Your Focus This Week`, 'weekly-digest-mentee', {
-      ...context,
-      dashboardUrl: `${this.frontendUrl}/dashboard/mentee`,
-    });
+    await this.send(
+      to,
+      `Week ${week} on TektonX — Your Focus This Week`,
+      'weekly-digest-mentee',
+      {
+        ...context,
+        dashboardUrl: `${this.frontendUrl}/dashboard/mentee`,
+      },
+    );
   }
 
   async sendWeeklyDigestMentor(to: string, context: Record<string, unknown>) {
     const week = context.week as number;
-    await this.send(to, `Week ${week} Mentor Brief — What Your Mentees Are Working On`, 'weekly-digest-mentor', {
-      ...context,
-      dashboardUrl: `${this.frontendUrl}/dashboard/mentor`,
-    });
+    await this.send(
+      to,
+      `Week ${week} Mentor Brief — What Your Mentees Are Working On`,
+      'weekly-digest-mentor',
+      {
+        ...context,
+        dashboardUrl: `${this.frontendUrl}/dashboard/mentor`,
+      },
+    );
   }
 
   async sendPartnershipAdminNotification(
@@ -153,12 +225,48 @@ export class MailService {
     partnershipType: string,
     message?: string,
   ) {
-    const adminEmail = this.config.get<string>('MAIL_USER', 'tektonxlabs@gmail.com');
+    const adminEmail = this.config.get<string>(
+      'MAIL_USER',
+      'tektonxlabs@gmail.com',
+    );
     await this.send(
       adminEmail,
       `New Partnership Inquiry — ${companyName}`,
       'partnership-admin-notify',
-      { companyName, contactName, email, partnershipType, message: message ?? null },
+      {
+        companyName,
+        contactName,
+        email,
+        partnershipType,
+        message: message ?? null,
+      },
+    );
+  }
+
+  async sendCommunityMemberConfirmation(to: string, name: string) {
+    await this.send(
+      to,
+      'Welcome to the TektonX Community!',
+      'community-member-confirmation',
+      { name },
+    );
+  }
+
+  async sendCommunityMemberAdminNotification(
+    name: string,
+    email: string,
+    phone?: string,
+    state?: string,
+  ) {
+    const adminEmail = this.config.get<string>(
+      'MAIL_USER',
+      'tektonxlabs@gmail.com',
+    );
+    await this.send(
+      adminEmail,
+      `New Community Member — ${name}`,
+      'community-member-admin-notify',
+      { name, email, phone: phone ?? null, state },
     );
   }
 }

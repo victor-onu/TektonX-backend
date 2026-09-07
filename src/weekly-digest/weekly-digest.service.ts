@@ -33,7 +33,8 @@ export class WeeklyDigestService {
 
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
-    @InjectRepository(MentorAssignment) private readonly assignmentRepo: Repository<MentorAssignment>,
+    @InjectRepository(MentorAssignment)
+    private readonly assignmentRepo: Repository<MentorAssignment>,
     @InjectRepository(Task) private readonly taskRepo: Repository<Task>,
     private readonly mailService: MailService,
     private readonly curriculum: CurriculumService,
@@ -53,7 +54,9 @@ export class WeeklyDigestService {
   }
 
   async runForCurrentWeek(): Promise<DigestRunResult> {
-    const week = this.curriculum.getCurrentWeekForCohort(this.curriculum.getCohortStart());
+    const week = this.curriculum.getCurrentWeekForCohort(
+      this.curriculum.getCohortStart(),
+    );
     if (week === null) {
       return {
         week: null,
@@ -90,10 +93,15 @@ export class WeeklyDigestService {
     for (const mentee of mentees) {
       const bundle = this.curriculum.buildBundle(mentee.track, week);
       if (!bundle.weekContent) {
-        skipped.push(`Mentee ${mentee.email}: no curriculum for track "${mentee.track}"`);
+        skipped.push(
+          `Mentee ${mentee.email}: no curriculum for track "${mentee.track}"`,
+        );
         continue;
       }
-      const milestoneCompleted = this.getMilestoneCompleted(mentee, bundle.milestone);
+      const milestoneCompleted = this.getMilestoneCompleted(
+        mentee,
+        bundle.milestone,
+      );
       try {
         await this.mailService.sendWeeklyDigestMentee(mentee.email, {
           name: mentee.name.split(' ')[0],
@@ -118,14 +126,19 @@ export class WeeklyDigestService {
     }
 
     // ── MENTORS ────────────────────────────────────────────────────────────────
-    const assignments = await this.assignmentRepo.find({ relations: ['mentor', 'mentee'] });
+    const assignments = await this.assignmentRepo.find({
+      relations: ['mentor', 'mentee'],
+    });
     const mentorMap = new Map<string, { mentor: User; mentees: User[] }>();
     for (const a of assignments) {
       if (!a.mentor || !a.mentee) continue;
       if (a.mentor.status !== UserStatus.ACTIVE) continue;
       if (a.mentee.status !== UserStatus.ACTIVE) continue;
       if (a.mentee.applicationStatus !== ApplicationStatus.ENROLLED) continue;
-      const entry = mentorMap.get(a.mentor.id) ?? { mentor: a.mentor, mentees: [] };
+      const entry = mentorMap.get(a.mentor.id) ?? {
+        mentor: a.mentor,
+        mentees: [],
+      };
       entry.mentees.push(a.mentee);
       mentorMap.set(a.mentor.id, entry);
     }
@@ -137,18 +150,30 @@ export class WeeklyDigestService {
           const c = this.curriculum.getWeekContent(track, week);
           return c ? { track, ...c } : null;
         })
-        .filter((x): x is { track: string } & ReturnType<CurriculumService['getWeekContent']> & object => x !== null);
+        .filter(
+          (
+            x,
+          ): x is { track: string } & ReturnType<
+            CurriculumService['getWeekContent']
+          > &
+            object => x !== null,
+        );
 
       const programEvent = this.curriculum.getProgramEventForWeek(week);
-      const milestone = this.curriculum.buildBundle(tracks[0] ?? '', week).milestone;
+      const milestone = this.curriculum.buildBundle(
+        tracks[0] ?? '',
+        week,
+      ).milestone;
 
       const singular = menteeList.length === 1;
       const mentorIntro = pickByWeek(MENTOR_INTROS, week)
         .replace('{week}', String(week))
         .replaceAll('{plural}', singular ? '' : 's')
         .replaceAll('{verb}', singular ? 'is' : 'are');
-      const mentorOutro = pickByWeek(MENTOR_OUTROS, week)
-        .replaceAll('{plural}', singular ? '' : 's');
+      const mentorOutro = pickByWeek(MENTOR_OUTROS, week).replaceAll(
+        '{plural}',
+        singular ? '' : 's',
+      );
 
       try {
         await this.mailService.sendWeeklyDigestMentor(mentor.email, {
@@ -170,10 +195,20 @@ export class WeeklyDigestService {
       }
     }
 
-    return { week, menteesSent, menteesFailed, mentorsSent, mentorsFailed, skipped };
+    return {
+      week,
+      menteesSent,
+      menteesFailed,
+      mentorsSent,
+      mentorsFailed,
+      skipped,
+    };
   }
 
-  private getMilestoneCompleted(mentee: User, milestone: 1 | 2 | 3 | null): number {
+  private getMilestoneCompleted(
+    mentee: User,
+    milestone: 1 | 2 | 3 | null,
+  ): number {
     if (!milestone) return 0;
     if (milestone === 1) return mentee.milestone1Completed ?? 0;
     if (milestone === 2) return mentee.milestone2Completed ?? 0;
@@ -182,9 +217,11 @@ export class WeeklyDigestService {
 
   // ── Preview (no email sent) ─────────────────────────────────────────────────
   async previewMentee(track: string, week: number) {
-    if (week < 1 || week > 12) throw new BadRequestException('Week must be between 1 and 12');
+    if (week < 1 || week > 12)
+      throw new BadRequestException('Week must be between 1 and 12');
     const bundle = this.curriculum.buildBundle(track, week);
-    if (!bundle.weekContent) throw new BadRequestException(`No curriculum for track "${track}"`);
+    if (!bundle.weekContent)
+      throw new BadRequestException(`No curriculum for track "${track}"`);
     return {
       ...bundle,
       track,
@@ -199,15 +236,25 @@ export class WeeklyDigestService {
   }
 
   async previewMentor(week: number, tracks: string[]) {
-    if (week < 1 || week > 12) throw new BadRequestException('Week must be between 1 and 12');
+    if (week < 1 || week > 12)
+      throw new BadRequestException('Week must be between 1 and 12');
     const trackContent = tracks
       .map((track) => {
         const c = this.curriculum.getWeekContent(track, week);
         return c ? { track, ...c } : null;
       })
-      .filter((x): x is { track: string } & NonNullable<ReturnType<CurriculumService['getWeekContent']>> => x !== null);
+      .filter(
+        (
+          x,
+        ): x is { track: string } & NonNullable<
+          ReturnType<CurriculumService['getWeekContent']>
+        > => x !== null,
+      );
     const programEvent = this.curriculum.getProgramEventForWeek(week);
-    const milestone = this.curriculum.buildBundle(tracks[0] ?? '', week).milestone;
+    const milestone = this.curriculum.buildBundle(
+      tracks[0] ?? '',
+      week,
+    ).milestone;
     return {
       name: 'Friend',
       week,

@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsEnum, IsDateString, IsOptional, IsUrl } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsDateString,
+  IsOptional,
+  IsUrl,
+} from 'class-validator';
 import { AnnouncementType } from '../../common/enums/announcement-type.enum';
 
 export class CreateAnnouncementDto {

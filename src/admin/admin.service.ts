@@ -46,7 +46,8 @@ export class AdminService {
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @InjectRepository(MentorAssignment)
     private readonly assignmentRepo: Repository<MentorAssignment>,
-    @InjectRepository(AuditLog) private readonly auditRepo: Repository<AuditLog>,
+    @InjectRepository(AuditLog)
+    private readonly auditRepo: Repository<AuditLog>,
     @InjectRepository(Task) private readonly taskRepo: Repository<Task>,
     @InjectRepository(Announcement)
     private readonly announcementRepo: Repository<Announcement>,
@@ -55,7 +56,8 @@ export class AdminService {
     @InjectRepository(Notification)
     private readonly notificationRepo: Repository<Notification>,
     @InjectRepository(Signup) private readonly signupRepo: Repository<Signup>,
-    @InjectRepository(Message) private readonly messageRepo: Repository<Message>,
+    @InjectRepository(Message)
+    private readonly messageRepo: Repository<Message>,
     private readonly notificationsService: NotificationsService,
     private readonly mailService: MailService,
   ) {}
@@ -67,7 +69,13 @@ export class AdminService {
     targetId: string,
     details?: object,
   ) {
-    const entry = this.auditRepo.create({ adminId, action, targetType, targetId, details });
+    const entry = this.auditRepo.create({
+      adminId,
+      action,
+      targetType,
+      targetId,
+      details,
+    });
     await this.auditRepo.save(entry);
   }
 
@@ -75,7 +83,10 @@ export class AdminService {
 
   async getPendingMentors(): Promise<User[]> {
     return this.userRepo.find({
-      where: { role: UserRole.MENTOR, applicationStatus: ApplicationStatus.PENDING_APPROVAL },
+      where: {
+        role: UserRole.MENTOR,
+        applicationStatus: ApplicationStatus.PENDING_APPROVAL,
+      },
       order: { createdAt: 'ASC' },
     });
   }
@@ -83,7 +94,10 @@ export class AdminService {
   async approveMentor(mentorId: string, adminId: string): Promise<User> {
     const mentor = await this.userRepo.findOne({ where: { id: mentorId } });
     if (!mentor) throw new NotFoundException('Mentor not found');
-    if (mentor.role !== UserRole.MENTOR || mentor.applicationStatus !== ApplicationStatus.PENDING_APPROVAL) {
+    if (
+      mentor.role !== UserRole.MENTOR ||
+      mentor.applicationStatus !== ApplicationStatus.PENDING_APPROVAL
+    ) {
       throw new BadRequestException('User is not a pending mentor');
     }
     mentor.status = UserStatus.ACTIVE;
@@ -100,14 +114,21 @@ export class AdminService {
       message: 'Congratulations! Your mentor application has been approved.',
     });
     this.logger.log(`Mentor ${mentor.email} approved by admin ${adminId}`);
-    this.mailService.sendMentorApproved(mentor.email, mentor.name).catch(() => {});
+    this.mailService
+      .sendMentorApproved(mentor.email, mentor.name)
+      .catch(() => {});
     return mentor;
   }
 
-  async rejectMentor(mentorId: string, adminId: string, dto: RejectMentorDto): Promise<User> {
+  async rejectMentor(
+    mentorId: string,
+    adminId: string,
+    dto: RejectMentorDto,
+  ): Promise<User> {
     const mentor = await this.userRepo.findOne({ where: { id: mentorId } });
     if (!mentor) throw new NotFoundException('Mentor not found');
-    if (mentor.role !== UserRole.MENTOR) throw new BadRequestException('User is not a mentor');
+    if (mentor.role !== UserRole.MENTOR)
+      throw new BadRequestException('User is not a mentor');
     mentor.status = UserStatus.INACTIVE;
     mentor.applicationStatus = ApplicationStatus.REJECTED;
     await this.userRepo.save(mentor);
@@ -123,7 +144,9 @@ export class AdminService {
         ? `Your application was not approved. Reason: ${dto.reason}`
         : 'Your mentor application was not approved at this time.',
     });
-    this.mailService.sendMentorRejected(mentor.email, mentor.name, dto.reason).catch(() => {});
+    this.mailService
+      .sendMentorRejected(mentor.email, mentor.name, dto.reason)
+      .catch(() => {});
     return mentor;
   }
 
@@ -139,12 +162,14 @@ export class AdminService {
   async getUnassignedMentees(track?: string) {
     const assignedMenteeIds = (
       await this.assignmentRepo.find({ select: ['menteeId'] })
-    ).map(a => a.menteeId);
+    ).map((a) => a.menteeId);
 
     const qb = this.userRepo
       .createQueryBuilder('u')
       .where('u.role = :role', { role: UserRole.MENTEE })
-      .andWhere('u.applicationStatus = :appStatus', { appStatus: ApplicationStatus.APPROVED });
+      .andWhere('u.applicationStatus = :appStatus', {
+        appStatus: ApplicationStatus.APPROVED,
+      });
 
     if (assignedMenteeIds.length > 0) {
       qb.andWhere('u.id NOT IN (:...ids)', { ids: assignedMenteeIds });
@@ -171,13 +196,18 @@ export class AdminService {
       const mentee = await this.userRepo.findOne({ where: { id: menteeId } });
       if (!mentee) throw new NotFoundException(`Mentee ${menteeId} not found`);
       if (mentee.applicationStatus === ApplicationStatus.GRADUATED) {
-        throw new BadRequestException(`${mentee.name} has graduated and cannot be reassigned`);
+        throw new BadRequestException(
+          `${mentee.name} has graduated and cannot be reassigned`,
+        );
       }
-      const existing = await this.assignmentRepo.findOne({ where: { menteeId } });
+      const existing = await this.assignmentRepo.findOne({
+        where: { menteeId },
+      });
       if (existing) {
         existing.mentorId = dto.mentorId;
         existing.assignedBy = adminId;
-        if (dto.cohortId !== undefined) existing.cohortId = dto.cohortId ?? null;
+        if (dto.cohortId !== undefined)
+          existing.cohortId = dto.cohortId ?? null;
         assignments.push(await this.assignmentRepo.save(existing));
       } else {
         const a = this.assignmentRepo.create({
@@ -202,7 +232,14 @@ export class AdminService {
         title: 'Mentor Assigned',
         message: `You have been assigned a mentor: ${mentor.name}`,
       });
-      this.mailService.sendMenteeAssigned(mentee.email, mentee.name, mentor.name, mentor.track).catch(() => {});
+      this.mailService
+        .sendMenteeAssigned(
+          mentee.email,
+          mentee.name,
+          mentor.name,
+          mentor.track,
+        )
+        .catch(() => {});
       assignedMentees.push({ name: mentee.name, track: mentee.track });
     }
     await this.notificationsService.create({
@@ -211,18 +248,34 @@ export class AdminService {
       title: 'New Mentees Assigned',
       message: `${dto.menteeIds.length} new mentee(s) have been assigned to you.`,
     });
-    this.mailService.sendMentorNewMentees(mentor.email, mentor.name, assignedMentees).catch(() => {});
-    await this.auditLog(adminId, 'mentee_assigned', 'mentor_assignment', dto.mentorId, {
-      menteeCount: dto.menteeIds.length,
-    });
+    this.mailService
+      .sendMentorNewMentees(mentor.email, mentor.name, assignedMentees)
+      .catch(() => {});
+    await this.auditLog(
+      adminId,
+      'mentee_assigned',
+      'mentor_assignment',
+      dto.mentorId,
+      {
+        menteeCount: dto.menteeIds.length,
+      },
+    );
     return assignments;
   }
 
   async unassignMentee(assignmentId: string, adminId: string) {
-    const assignment = await this.assignmentRepo.findOne({ where: { id: assignmentId } });
+    const assignment = await this.assignmentRepo.findOne({
+      where: { id: assignmentId },
+    });
     if (!assignment) throw new NotFoundException('Assignment not found');
     await this.assignmentRepo.remove(assignment);
-    await this.auditLog(adminId, 'mentee_unassigned', 'mentor_assignment', assignmentId, {});
+    await this.auditLog(
+      adminId,
+      'mentee_unassigned',
+      'mentor_assignment',
+      assignmentId,
+      {},
+    );
     return { message: 'Mentee unassigned successfully' };
   }
 
@@ -242,7 +295,12 @@ export class AdminService {
       this.userRepo.count({ where: { role: UserRole.MENTEE } }),
       this.userRepo.count({ where: { role: UserRole.MENTOR } }),
       this.userRepo.count({ where: { role: UserRole.ADMIN } }),
-      this.userRepo.count({ where: { role: UserRole.MENTOR, applicationStatus: ApplicationStatus.PENDING_APPROVAL } }),
+      this.userRepo.count({
+        where: {
+          role: UserRole.MENTOR,
+          applicationStatus: ApplicationStatus.PENDING_APPROVAL,
+        },
+      }),
       this.assignmentRepo.count(),
       this.taskRepo.count({ where: { userId: null as any } }),
       this.announcementRepo.count(),
@@ -279,7 +337,9 @@ export class AdminService {
     if (status) qb.andWhere('u.status = :status', { status });
     if (track) qb.andWhere('u.track = :track', { track });
     if (search) {
-      qb.andWhere('(u.name ILIKE :search OR u.email ILIKE :search)', { search: `%${search}%` });
+      qb.andWhere('(u.name ILIKE :search OR u.email ILIKE :search)', {
+        search: `%${search}%`,
+      });
     }
     qb.skip((page - 1) * limit)
       .take(limit)
@@ -288,8 +348,13 @@ export class AdminService {
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
-  async changeUserRole(userId: string, newRole: UserRole, adminId: string): Promise<User> {
-    if (userId === adminId) throw new BadRequestException('Cannot change your own role');
+  async changeUserRole(
+    userId: string,
+    newRole: UserRole,
+    adminId: string,
+  ): Promise<User> {
+    if (userId === adminId)
+      throw new BadRequestException('Cannot change your own role');
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     user.role = newRole;
@@ -300,11 +365,14 @@ export class AdminService {
   }
 
   async deleteUser(userId: string, adminId: string) {
-    if (userId === adminId) throw new BadRequestException('Cannot delete your own account');
+    if (userId === adminId)
+      throw new BadRequestException('Cannot delete your own account');
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     await this.userRepo.remove(user);
-    await this.auditLog(adminId, 'user_deleted', 'user', userId, { email: user.email });
+    await this.auditLog(adminId, 'user_deleted', 'user', userId, {
+      email: user.email,
+    });
     return { message: 'User deleted' };
   }
 
@@ -324,12 +392,17 @@ export class AdminService {
   ): Promise<User> {
     const mentee = await this.userRepo.findOne({ where: { id: menteeId } });
     if (!mentee) throw new NotFoundException('Mentee not found');
-    if (mentee.role !== UserRole.MENTEE) throw new BadRequestException('User is not a mentee');
+    if (mentee.role !== UserRole.MENTEE)
+      throw new BadRequestException('User is not a mentee');
     mentee.applicationStatus = newStatus;
     await this.userRepo.save(mentee);
-    await this.auditLog(adminId, 'mentee_status_updated', 'user', menteeId, { newStatus });
+    await this.auditLog(adminId, 'mentee_status_updated', 'user', menteeId, {
+      newStatus,
+    });
     if (newStatus === ApplicationStatus.APPROVED) {
-      this.mailService.sendMenteeApproved(mentee.email, mentee.name).catch(() => {});
+      this.mailService
+        .sendMenteeApproved(mentee.email, mentee.name)
+        .catch(() => {});
     }
     return mentee;
   }
@@ -339,17 +412,23 @@ export class AdminService {
   async graduateMentee(menteeId: string, adminId: string): Promise<User> {
     const mentee = await this.userRepo.findOne({ where: { id: menteeId } });
     if (!mentee) throw new NotFoundException('Mentee not found');
-    if (mentee.role !== UserRole.MENTEE) throw new BadRequestException('User is not a mentee');
+    if (mentee.role !== UserRole.MENTEE)
+      throw new BadRequestException('User is not a mentee');
     if (mentee.applicationStatus === ApplicationStatus.GRADUATED) {
       throw new BadRequestException('Mentee is already graduated');
     }
     mentee.applicationStatus = ApplicationStatus.GRADUATED;
     await this.userRepo.save(mentee);
-    await this.auditLog(adminId, 'mentee_graduated', 'user', menteeId, { email: mentee.email });
+    await this.auditLog(adminId, 'mentee_graduated', 'user', menteeId, {
+      email: mentee.email,
+    });
     return mentee;
   }
 
-  async graduateCohort(cohortId: string, adminId: string): Promise<{ graduated: number }> {
+  async graduateCohort(
+    cohortId: string,
+    adminId: string,
+  ): Promise<{ graduated: number }> {
     const mentees = await this.userRepo.find({
       where: {
         cohortId,
@@ -364,20 +443,25 @@ export class AdminService {
       mentee.applicationStatus = ApplicationStatus.GRADUATED;
     }
     await this.userRepo.save(mentees);
-    await this.auditLog(adminId, 'cohort_graduated', 'cohort', cohortId, { count: mentees.length });
+    await this.auditLog(adminId, 'cohort_graduated', 'cohort', cohortId, {
+      count: mentees.length,
+    });
     return { graduated: mentees.length };
   }
 
   async markMentorAlumni(mentorId: string, adminId: string): Promise<User> {
     const mentor = await this.userRepo.findOne({ where: { id: mentorId } });
     if (!mentor) throw new NotFoundException('Mentor not found');
-    if (mentor.role !== UserRole.MENTOR) throw new BadRequestException('User is not a mentor');
+    if (mentor.role !== UserRole.MENTOR)
+      throw new BadRequestException('User is not a mentor');
     if (mentor.status === UserStatus.ALUMNI) {
       throw new BadRequestException('Mentor is already marked as alumni');
     }
     mentor.status = UserStatus.ALUMNI;
     await this.userRepo.save(mentor);
-    await this.auditLog(adminId, 'mentor_alumni', 'user', mentorId, { email: mentor.email });
+    await this.auditLog(adminId, 'mentor_alumni', 'user', mentorId, {
+      email: mentor.email,
+    });
     return mentor;
   }
 
@@ -387,7 +471,9 @@ export class AdminService {
     dto: { name: string; email: string; track: string },
     adminId: string,
   ): Promise<User> {
-    const existing = await this.userRepo.findOne({ where: { email: dto.email } });
+    const existing = await this.userRepo.findOne({
+      where: { email: dto.email },
+    });
     if (existing) throw new ConflictException('Email already registered');
 
     const crypto = await import('crypto');
@@ -409,9 +495,13 @@ export class AdminService {
     await this.userRepo.save(user);
 
     const activateUrl = `${process.env.FRONTEND_URL?.split(',')[0].trim() ?? 'http://localhost:5173'}/auth/activate?token=${inviteToken}`;
-    this.mailService.sendInvite(dto.email, dto.name, activateUrl).catch(() => {});
+    this.mailService
+      .sendInvite(dto.email, dto.name, activateUrl)
+      .catch(() => {});
 
-    await this.auditLog(adminId, 'mentee_invited', 'user', user.id, { email: dto.email });
+    await this.auditLog(adminId, 'mentee_invited', 'user', user.id, {
+      email: dto.email,
+    });
     return user;
   }
 
@@ -426,7 +516,9 @@ export class AdminService {
     for (const row of rows) {
       if (!VALID_TRACKS.includes(row.track)) {
         failed++;
-        errors.push(`${row.email}: Invalid track "${row.track}". Must be one of: ${VALID_TRACKS.join(' | ')}`);
+        errors.push(
+          `${row.email}: Invalid track "${row.track}". Must be one of: ${VALID_TRACKS.join(' | ')}`,
+        );
         continue;
       }
       try {
@@ -445,7 +537,9 @@ export class AdminService {
   async createTemplateTask(dto: any, adminId: string) {
     const task = this.taskRepo.create({ ...dto, userId: null });
     const saved = (await this.taskRepo.save(task)) as unknown as Task;
-    await this.auditLog(adminId, 'task_created', 'task', saved.id, { title: saved.title });
+    await this.auditLog(adminId, 'task_created', 'task', saved.id, {
+      title: saved.title,
+    });
     return saved;
   }
 
@@ -491,11 +585,13 @@ export class AdminService {
   }
 
   async exportSignupsCsv(): Promise<string> {
-    const signups = await this.signupRepo.find({ order: { createdAt: 'DESC' } });
+    const signups = await this.signupRepo.find({
+      order: { createdAt: 'DESC' },
+    });
     const header = 'id,name,email,whatsapp,track,experienceLevel,createdAt\n';
     const rows = signups
       .map(
-        s =>
+        (s) =>
           `${s.id},"${s.name}","${s.email}","${s.whatsapp ?? ''}","${s.track}","${s.experienceLevel}","${s.createdAt.toISOString()}"`,
       )
       .join('\n');
@@ -520,7 +616,9 @@ export class AdminService {
 
   async getAuditLog(filters: { action?: string; page: number; limit: number }) {
     const { action, page, limit } = filters;
-    const qb = this.auditRepo.createQueryBuilder('a').leftJoinAndSelect('a.admin', 'admin');
+    const qb = this.auditRepo
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.admin', 'admin');
     if (action) qb.andWhere('a.action = :action', { action });
     qb.skip((page - 1) * limit)
       .take(limit)
@@ -538,7 +636,8 @@ export class AdminService {
       return UserRole.MENTEE;
     });
 
-    const qb = this.userRepo.createQueryBuilder('u')
+    const qb = this.userRepo
+      .createQueryBuilder('u')
       .where('u.role IN (:...roles)', { roles: roleEnums })
       .andWhere('u.status NOT IN (:...excludedStatuses)', {
         excludedStatuses: [UserStatus.SUSPENDED, UserStatus.ALUMNI],
@@ -553,7 +652,9 @@ export class AdminService {
       qb.andWhere('u.track IN (:...tracks)', { tracks: dto.tracks });
     }
     if (dto.cohortIds && dto.cohortIds.length > 0) {
-      qb.andWhere('u.cohortId IN (:...cohortIds)', { cohortIds: dto.cohortIds });
+      qb.andWhere('u.cohortId IN (:...cohortIds)', {
+        cohortIds: dto.cohortIds,
+      });
     }
     return qb;
   }
@@ -575,7 +676,10 @@ export class AdminService {
       return { sent: 0, failed: 0 };
     }
 
-    const htmlBody = await marked.parse(dto.body, { breaks: true, async: true });
+    const htmlBody = await marked.parse(dto.body, {
+      breaks: true,
+      async: true,
+    });
 
     let sent = 0;
     let failed = 0;
@@ -584,7 +688,12 @@ export class AdminService {
       const batch = recipients.slice(i, i + batchSize);
       const results = await Promise.allSettled(
         batch.map((u) =>
-          this.mailService.sendBroadcast(u.email, u.name, dto.subject, htmlBody as string),
+          this.mailService.sendBroadcast(
+            u.email,
+            u.name,
+            dto.subject,
+            htmlBody,
+          ),
         ),
       );
       for (const r of results) {

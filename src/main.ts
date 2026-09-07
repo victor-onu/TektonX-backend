@@ -12,7 +12,9 @@ async function bootstrap() {
   // CORS — support multiple origins (local, dev, production)
   const allowedOrigins = [
     'http://localhost:5173',
-    ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) : []),
+    ...(process.env.FRONTEND_URL
+      ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
+      : []),
   ];
   app.enableCors({
     origin: (origin, callback) => {

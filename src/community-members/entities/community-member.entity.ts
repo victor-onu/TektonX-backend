@@ -5,16 +5,13 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 
-@Entity('partnership_inquiries')
-export class PartnershipInquiry {
+@Entity('community_members')
+export class CommunityMember {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'varchar' })
-  companyName: string;
-
-  @Column({ type: 'varchar' })
-  contactName: string;
+  name: string;
 
   @Column({ type: 'varchar' })
   email: string;
@@ -23,10 +20,7 @@ export class PartnershipInquiry {
   phone: string | null;
 
   @Column({ type: 'varchar' })
-  partnershipType: string;
-
-  @Column({ type: 'text', nullable: true })
-  message: string | null;
+  state: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
