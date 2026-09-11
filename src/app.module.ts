@@ -32,6 +32,7 @@ import { HealthModule } from './health/health.module';
 import { CohortsModule } from './cohorts/cohorts.module';
 import { PartnershipsModule } from './partnerships/partnerships.module';
 import { CommunityMembersModule } from './community-members/community-members.module';
+import { EventsModule } from './events/events.module';
 import { CurriculumModule } from './curriculum/curriculum.module';
 import { WeeklyDigestModule } from './weekly-digest/weekly-digest.module';
 
@@ -81,6 +82,7 @@ import { WeeklyDigestModule } from './weekly-digest/weekly-digest.module';
     CohortsModule,
     PartnershipsModule,
     CommunityMembersModule,
+    EventsModule,
     CurriculumModule,
     WeeklyDigestModule,
   ],
