@@ -269,4 +269,53 @@ export class MailService {
       { name, email, phone: phone ?? null, state },
     );
   }
+
+  async sendEventRegistrationConfirmation(
+    to: string,
+    name: string,
+    eventName: string,
+  ) {
+    await this.send(
+      to,
+      `You're on the list — ${eventName}`,
+      'event-registration-confirmation',
+      {
+        name,
+        eventName,
+      },
+    );
+  }
+
+  async sendEventRegistrationAdminNotification(
+    eventName: string,
+    registration: {
+      name: string;
+      email: string;
+      phone: string;
+      role: string;
+      organisation?: string;
+      volunteer?: string;
+      question?: string;
+    },
+  ) {
+    const adminEmail = this.config.get<string>(
+      'MAIL_USER',
+      'tektonxlabs@gmail.com',
+    );
+    await this.send(
+      adminEmail,
+      `New Registration — ${eventName}`,
+      'event-registration-admin-notify',
+      {
+        eventName,
+        name: registration.name,
+        email: registration.email,
+        phone: registration.phone,
+        role: registration.role,
+        organisation: registration.organisation ?? null,
+        volunteer: registration.volunteer ?? null,
+        question: registration.question ?? null,
+      },
+    );
+  }
 }
