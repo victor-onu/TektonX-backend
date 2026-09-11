@@ -3,9 +3,11 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  Index,
 } from 'typeorm';
 
 @Entity('community_members')
+@Index(['email'], { unique: true })
 export class CommunityMember {
   @PrimaryGeneratedColumn('uuid')
   id: string;

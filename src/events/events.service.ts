@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Event } from './entities/event.entity';
@@ -31,22 +35,49 @@ export class EventsService {
     dto: CreateEventRegistrationDto,
   ): Promise<{ message: string }> {
     const event = await this.findBySlug(slug);
+    // Normalize so "Foo@Bar.com" and "foo@bar.com" are treated as the same
+    // applicant — both for the duplicate check below and for what's stored.
+    const email = dto.email.trim().toLowerCase();
+
+    const duplicateMessage =
+      'This email has already been used to apply for this event.';
+
+    const existing = await this.registrationRepo.findOne({
+      where: { eventId: event.id, email },
+    });
+    if (existing) {
+      throw new ConflictException(duplicateMessage);
+    }
+
     const registration = this.registrationRepo.create({
       eventId: event.id,
       name: dto.name,
-      email: dto.email,
+      email,
       phone: dto.phone,
       role: dto.role,
       organisation: dto.organisation ?? null,
       volunteer: dto.volunteer ?? null,
       question: dto.question ?? null,
     });
-    await this.registrationRepo.save(registration);
+
+    try {
+      await this.registrationRepo.save(registration);
+    } catch (err) {
+      // Belt-and-braces against a race between two near-simultaneous
+      // submissions with the same email (the findOne check above can't
+      // catch that) — the DB's unique(event_id, email) index rejects the
+      // second insert with Postgres error 23505 (unique_violation).
+      if ((err as { code?: string })?.code === '23505') {
+        throw new ConflictException(duplicateMessage);
+      }
+      throw err;
+    }
+
     this.mailService
-      .sendEventRegistrationConfirmation(dto.email, dto.name, event.name)
+      .sendEventRegistrationConfirmation(email, dto.name, event.name)
       .catch(() => {});
     this.mailService
-      .sendEventRegistrationAdminNotification(event.name, dto)
+      .sendEventRegistrationAdminNotification(event.name, { ...dto, email })
       .catch(() => {});
     return { message: 'Thank you. Watch your email for the confirmation.' };
   }

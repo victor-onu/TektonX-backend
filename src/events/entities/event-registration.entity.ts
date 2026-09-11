@@ -5,10 +5,12 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
+  Index,
 } from 'typeorm';
 import { Event } from './event.entity';
 
 @Entity('event_registrations')
+@Index(['eventId', 'email'], { unique: true })
 export class EventRegistration {
   @PrimaryGeneratedColumn('uuid')
   id: string;
