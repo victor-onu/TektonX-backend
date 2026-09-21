@@ -358,7 +358,9 @@ export class AdminService {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     user.role = newRole;
-    if (newRole === UserRole.MENTOR) user.status = UserStatus.ACTIVE;
+    if (newRole === UserRole.MENTOR || newRole === UserRole.COMMUNITY_MANAGER) {
+      user.status = UserStatus.ACTIVE;
+    }
     await this.userRepo.save(user);
     await this.auditLog(adminId, 'role_changed', 'user', userId, { newRole });
     return user;
