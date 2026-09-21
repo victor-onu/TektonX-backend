@@ -5,9 +5,14 @@ import { EventRegistration } from './entities/event-registration.entity';
 import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { MailModule } from '../mail/mail.module';
+import { AuditLogModule } from '../audit-log/audit-log.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Event, EventRegistration]), MailModule],
+  imports: [
+    TypeOrmModule.forFeature([Event, EventRegistration]),
+    MailModule,
+    AuditLogModule,
+  ],
   controllers: [EventsController],
   providers: [EventsService],
 })

@@ -29,6 +29,7 @@ export class MailService {
     subject: string,
     template: string,
     context: object,
+    attachments?: { filename: string; content: Buffer; contentType?: string }[],
   ) {
     try {
       await this.mailer.sendMail({
@@ -36,6 +37,7 @@ export class MailService {
         subject,
         template,
         context: { ...context, year: this.year, frontendUrl: this.frontendUrl },
+        ...(attachments?.length ? { attachments } : {}),
       });
       this.logger.log(`[EMAIL SENT] To: ${to} | Subject: ${subject}`);
     } catch (err) {
@@ -190,6 +192,26 @@ export class MailService {
       subject,
       body: htmlBody,
     });
+  }
+
+  // Community managers' "email registrants" feature. Reuses the same
+  // generic broadcast template/layout (it only needs name/subject/body) —
+  // kept as its own method rather than overloading sendBroadcast so the
+  // general broadcast feature's signature never has to change.
+  async sendEventRegistrantEmail(
+    to: string,
+    name: string,
+    subject: string,
+    htmlBody: string,
+    attachments?: { filename: string; content: Buffer; contentType?: string }[],
+  ) {
+    await this.send(
+      to,
+      subject,
+      'broadcast',
+      { name, subject, body: htmlBody },
+      attachments,
+    );
   }
 
   async sendWeeklyDigestMentee(to: string, context: Record<string, unknown>) {
