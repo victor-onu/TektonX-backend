@@ -21,6 +21,7 @@ import { User } from '../users/entities/user.entity';
 import { EventsService } from './events.service';
 import { CreateEventRegistrationDto } from './dto/create-event-registration.dto';
 import { EmailRegistrantsDto } from './dto/email-registrants.dto';
+import { SmsRegistrantsDto } from './dto/sms-registrants.dto';
 
 // Both routes below are shared with UserRole.COMMUNITY_MANAGER on purpose —
 // this is the ONLY place that role appears in @Roles() anywhere in the app,
@@ -88,5 +89,15 @@ export class EventsController {
     @CurrentUser() user: User,
   ) {
     return this.service.emailRegistrants(slug, dto, files, user.id);
+  }
+
+  @Roles(...EVENTS_ADMIN_ROLES)
+  @Post(':slug/registrations/sms')
+  smsRegistrants(
+    @Param('slug') slug: string,
+    @Body() dto: SmsRegistrantsDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.service.smsRegistrants(slug, dto, user.id);
   }
 }

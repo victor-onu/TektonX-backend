@@ -12,7 +12,9 @@ import { Event } from './entities/event.entity';
 import { EventRegistration } from './entities/event-registration.entity';
 import { CreateEventRegistrationDto } from './dto/create-event-registration.dto';
 import { EmailRegistrantsDto } from './dto/email-registrants.dto';
+import { SmsRegistrantsDto } from './dto/sms-registrants.dto';
 import { MailService } from '../mail/mail.service';
+import { SmsService } from '../sms/sms.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 
 type MailAttachment = {
@@ -29,6 +31,7 @@ export class EventsService {
     @InjectRepository(EventRegistration)
     private readonly registrationRepo: Repository<EventRegistration>,
     private readonly mailService: MailService,
+    private readonly smsService: SmsService,
     private readonly auditLogService: AuditLogService,
   ) {}
 
@@ -196,6 +199,79 @@ export class EventsService {
         subject: dto.subject,
         audience: dto.audience,
         attachmentCount: attachments.length,
+        sent,
+        failed,
+      },
+    });
+
+    return { sent, failed };
+  }
+
+  // Community managers' "SMS registrants" feature — All / Volunteers-only /
+  // a manually typed list (which doesn't have to match any registrant at
+  // all, e.g. a speaker or partner). Mirrors the email feature but sends
+  // SMS instead. Phone numbers must be in international format (e.g. 2347037770033).
+  async smsRegistrants(
+    slug: string,
+    dto: SmsRegistrantsDto,
+    actorId: string,
+  ): Promise<{ sent: number; failed: number }> {
+    const event = await this.findBySlug(slug);
+
+    let recipients: { name: string; phone: string }[];
+    if (dto.audience === 'manual') {
+      const raw = (dto.manualPhones ?? '')
+        .split(/[\n,]/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+      // Basic validation: phone numbers should be digits only (after removing spaces/dashes)
+      const normalized = raw.map((p) => p.replace(/[\s\-\(\)]/g, ''));
+      const invalid = normalized.filter((p) => !/^\d{10,15}$/.test(p));
+      if (invalid.length > 0) {
+        throw new BadRequestException(
+          `These don't look like valid phone numbers: ${invalid.join(', ')}`,
+        );
+      }
+      const deduped = [...new Set(normalized)];
+      recipients = deduped.map((phone) => ({ name: '', phone }));
+    } else {
+      const where =
+        dto.audience === 'volunteers'
+          ? { eventId: event.id, volunteer: 'yes' }
+          : { eventId: event.id };
+      const registrations = await this.registrationRepo.find({ where });
+      recipients = registrations.map((r) => ({
+        name: r.name,
+        phone: r.phone.replace(/[\s\-\(\)]/g, ''), // Normalize phone format
+      }));
+    }
+
+    if (recipients.length === 0) {
+      return { sent: 0, failed: 0 };
+    }
+
+    let sent = 0;
+    let failed = 0;
+    const batchSize = 25;
+    for (let i = 0; i < recipients.length; i += batchSize) {
+      const batch = recipients.slice(i, i + batchSize);
+      const results = await Promise.allSettled(
+        batch.map((r) => this.smsService.sendSMS(r.phone, dto.message)),
+      );
+      for (const r of results) {
+        if (r.status === 'fulfilled' && r.value.success) sent++;
+        else failed++;
+      }
+    }
+
+    await this.auditLogService.log({
+      adminId: actorId,
+      action: 'event_registrants_sms_sent',
+      targetType: 'event',
+      targetId: event.id,
+      details: {
+        audience: dto.audience,
+        messageLength: dto.message.length,
         sent,
         failed,
       },
